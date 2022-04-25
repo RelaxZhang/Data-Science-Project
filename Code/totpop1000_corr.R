@@ -1,5 +1,5 @@
 # Correlation Calculation
-totpop_1000 <- read.csv(file="totpop_1000.csv")
+totpop_1000 <- read.csv(file="../Data/totpop_1000.csv")
 corr_matrix <- as.matrix(cor(totpop_1000))
 
 # Extract regions for presentation
