@@ -1,0 +1,256 @@
+---
+title: "Hierachical_Info"
+author: "Chi Zhang"
+date: "02/05/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+# Import the libraries
+library("reshape")
+library("ggplot2")
+library("plot.matrix")
+library("MASS")
+library("forecast")
+library("fracdiff")
+library("ggpubr")
+theme_set(theme_pubr())
+```
+
+# Preprocessing
+```{r}
+# Read in dataset of SA3 regions with total population greater than 1000 in each year
+above1000 <- read.csv(file="../Data/ts_1000.csv")
+
+# Aggregate data with sex type in each region
+# Hierarchy becomes: Total -> Male & Female among each year in each region
+sex <- aggregate(cbind(above1000$X1991, above1000$X1992, above1000$X1993, 
+                       above1000$X1994, above1000$X1995, above1000$X1996, 
+                       above1000$X1997, above1000$X1998, above1000$X1999, 
+                       above1000$X2000, above1000$X2001, above1000$X2002,
+                       above1000$X2003, above1000$X2004, above1000$X2005,
+                       above1000$X2006, above1000$X2007, above1000$X2008,
+                       above1000$X2009, above1000$X2010, above1000$X2011),
+                 by = list(above1000$sex, above1000$SA3_Code), FUN = sum)
+
+aggre_sex <- c("sex", "SA3", 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+               2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011)
+colnames(sex) <- aggre_sex
+
+# Aggregate data with age type in each region
+# Hierarchy becomes: Total -> 0-4 & 5-9 ... & 85+ among each year in each region
+age <- aggregate(cbind(above1000$X1991, above1000$X1992, above1000$X1993, 
+                       above1000$X1994, above1000$X1995, above1000$X1996, 
+                       above1000$X1997, above1000$X1998, above1000$X1999, 
+                       above1000$X2000, above1000$X2001, above1000$X2002,
+                       above1000$X2003, above1000$X2004, above1000$X2005,
+                       above1000$X2006, above1000$X2007, above1000$X2008,
+                       above1000$X2009, above1000$X2010, above1000$X2011),
+                 by = list(above1000$age, above1000$SA3_Code), FUN = sum)
+
+aggre_age <- c("age", "SA3", 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+               2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011)
+colnames(age) <- aggre_age
+
+timestamp <- c(1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011)
+
+# Collect Total population among each year in each SA3 region
+total <- c()
+drop_sex <- c()
+drop_age <- c()
+
+for (i in (1:length(sex[, 1]))){
+  if (sex[i, 1] == "T"){
+    total = rbind(total, (sex[i, ]))
+    drop_sex = append(drop_sex, i)}}
+
+for (i in (1:length(age[, 1]))){
+  if (age[i, 1] == 99){
+    drop_age = append(drop_age, i)}}
+
+# Drop total rows in both aggregated age and sex dataset
+sex <- sex[-drop_sex, ]
+age <- age[-drop_age, ]
+```
+
+# Plot Trend Curve in Aggregate Level (Sex & Total)
+```{r}
+# Sex aggregated sample time-series plot
+sex_sample_1 <- sex[1:2, 3:23] 
+sex_sample_3 <- sex[5:6, 3:23]
+sex_sample_15 <- sex[29:30, 3:23] 
+
+plot_data_1 <- data.frame(cbind(t(sex_sample_1), timestamp))
+plot_data_3 <- data.frame(cbind(t(sex_sample_3), timestamp))
+plot_data_15 <- data.frame(cbind(t(sex_sample_15), timestamp))
+
+plot_data_test_1 <- melt(plot_data_1, id.vars = "timestamp")
+lp1 <- ggplot(data = plot_data_test_1, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+plot_data_test_3 <- melt(plot_data_3, id.vars = "timestamp")
+lp3 <- ggplot(data = plot_data_test_3, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+plot_data_test_15 <- melt(plot_data_15, id.vars = "timestamp")
+lp15 <- ggplot(data = plot_data_test_15, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+figure1 <- ggarrange(lp1, lp3, lp15, ncol = 1, nrow = 3)
+figure1
+
+# Sex total aggregated sample time-series plot
+plot_data_1 <- data.frame(cbind(t(sex_sample_1), t(total[1, 3:23]), timestamp))
+plot_data_3 <- data.frame(cbind(t(sex_sample_3), t(total[3, 3:23]), timestamp))
+plot_data_15 <- data.frame(cbind(t(sex_sample_15), t(total[15, 3:23]), timestamp))
+
+plot_data_test_1 <- melt(plot_data_1, id.vars = "timestamp")
+lp1 <- ggplot(data = plot_data_test_1, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+plot_data_test_3 <- melt(plot_data_3, id.vars = "timestamp")
+lp3 <- ggplot(data = plot_data_test_3, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+plot_data_test_15 <- melt(plot_data_15, id.vars = "timestamp")
+lp15 <- ggplot(data = plot_data_test_15, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+figure2 <- ggarrange(lp1, lp3, lp15, ncol = 1, nrow = 3)
+figure2
+```
+
+# Plot Trend Curve in Aggregate Level (Age & Total)
+```{r}
+# Sex aggregated sample time-series plot
+age_sample_1 <- age[1:18, 3:23] 
+
+plot_data_1 <- data.frame(cbind(t(age_sample_1), timestamp))
+plot_data_test_1 <- melt(plot_data_1, id.vars = "timestamp")
+lp1 <- ggplot(data = plot_data_test_1, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+plot_data_1_tot <- data.frame(cbind(t(age_sample_1), t(total[1, 3:23]), timestamp))
+plot_data_test_1_tot <- melt(plot_data_1_tot, id.vars = "timestamp")
+lp1_tot <- ggplot(data = plot_data_test_1_tot, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+figure1 <- ggarrange(lp1, lp1_tot, ncol = 1, nrow = 2)
+figure1
+
+# Sex aggregated sample time-series plot
+age_sample_3 <- age[19:36, 3:23] 
+
+plot_data_3 <- data.frame(cbind(t(age_sample_3), timestamp))
+plot_data_test_3 <- melt(plot_data_3, id.vars = "timestamp")
+lp3 <- ggplot(data = plot_data_test_3, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+plot_data_3_tot <- data.frame(cbind(t(age_sample_3), t(total[3, 3:23]), timestamp))
+plot_data_test_3_tot <- melt(plot_data_3_tot, id.vars = "timestamp")
+lp3_tot <- ggplot(data = plot_data_test_3_tot, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+figure3 <- ggarrange(lp3, lp3_tot, ncol = 1, nrow = 2)
+figure3
+
+# Sex aggregated sample time-series plot
+age_sample_15 <- age[271:288, 3:23]
+
+plot_data_15 <- data.frame(cbind(t(age_sample_15), timestamp))
+plot_data_test_15 <- melt(plot_data_15, id.vars = "timestamp")
+lp15 <- ggplot(data = plot_data_test_15, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+plot_data_15_tot <- data.frame(cbind(t(age_sample_15), t(total[15, 3:23]), timestamp))
+plot_data_test_15_tot <- melt(plot_data_15_tot, id.vars = "timestamp")
+lp15_tot <- ggplot(data = plot_data_test_15_tot, aes(x = timestamp, y = value, color = variable)) + geom_line()
+
+figure15 <- ggarrange(lp15, lp15_tot, ncol = 1, nrow = 2)
+figure15
+```
+
+# Year difference of each hierachy time-series (Sex)
+# Age difference of each hierachy time-series (Age) it is even worst with different patterns in each cohort
+```{r}
+time_series = ts(unlist(sex[1, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+time_series %>% diff() %>% ggtsdisplay(main="")
+
+time_series = ts(unlist(sex[2, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+time_series %>% diff() %>% ggtsdisplay(main="")
+
+# Notice that Time-series of sex in region 3 (SA3 = 10103)
+time_series = ts(unlist(sex[5, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+time_series %>% diff() %>% ggtsdisplay(main="")
+
+time_series = ts(unlist(sex[6, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+time_series %>% diff() %>% ggtsdisplay(main="")
+
+time_series = ts(unlist(sex[29, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+time_series %>% diff() %>% ggtsdisplay(main="")
+
+time_series = ts(unlist(sex[30, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+time_series %>% diff() %>% ggtsdisplay(main="")
+```
+
+# ETS Forecast of each region (Total)
+```{r}
+# Total ETS Forecast
+time_series = ts(unlist(total[1, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit1t <- ets(time_series)
+fit1t %>% forecast(h = 5) %>% autoplot() + ylab("total population in next 5 years")
+
+# Total ETS Forecast
+time_series = ts(unlist(total[3, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit1t <- ets(time_series)
+fit1t %>% forecast(h = 5) %>% autoplot() + ylab("total population in next 5 years")
+
+# Total ETS Forecast
+time_series = ts(unlist(total[15, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit1t <- ets(time_series)
+fit1t %>% forecast(h = 5) %>% autoplot() + ylab("total population in next 5 years")
+```
+
+# ETS Forecast of each hierachy (Sex)
+```{r}
+# Sex ETS Forecast
+time_series = ts(unlist(sex[1, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit1f <- ets(time_series)
+fit1f %>% forecast(h = 5) %>% autoplot() + ylab("female population in next 5 years")
+
+time_series = ts(unlist(sex[2, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit1m <- ets(time_series)
+fit1m %>% forecast(h = 5) %>% autoplot() + ylab("male population in next 5 years")
+
+time_series = ts(unlist(sex[5, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit3f <- ets(time_series)
+fit3f %>% forecast(h = 5) %>% autoplot() + ylab("female population in next 5 years")
+
+time_series = ts(unlist(sex[6, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit3m <- ets(time_series)
+fit3m %>% forecast(h = 5) %>% autoplot() + ylab("male population in next 5 years")
+
+time_series = ts(unlist(sex[29, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit15f <- ets(time_series)
+fit15f %>% forecast(h = 5) %>% autoplot() + ylab("female population in next 5 years")
+
+time_series = ts(unlist(sex[30, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit15m <- ets(time_series)
+fit15m %>% forecast(h = 5) %>% autoplot() + ylab("male population in next 5 years")
+```
+
+# ETS Forecast of each hierachy (Age)
+```{r}
+# Sex ETS Forecast
+time_series = ts(unlist(age[13, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
+fit1f <- ets(time_series)
+fit1f %>% forecast(h = 5) %>% autoplot() + ylab("age population in next 5 years")
+```
+
+# MTS Forecast (Sex) -- Cannot Run, Why?
+```{r}
+# MTS Sex
+
+```
+
+# Save preprocessed time-series data (aggregated)
+```{r}
+# Save the pre-processed data of aggregated sex, age, total data in each time-series
+write.csv(data.frame(sex), paste0("../Data/sex_1000.csv"))
+write.csv(data.frame(age), paste0("../Data/age_1000.csv"))
+write.csv(data.frame(total), paste0("../Data/tot_1000.csv"))
+```
