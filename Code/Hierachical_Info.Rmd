@@ -136,7 +136,7 @@ figure1 <- ggarrange(lp1, lp1_tot, ncol = 1, nrow = 2)
 figure1
 
 # Sex aggregated sample time-series plot
-age_sample_3 <- age[19:36, 3:23] 
+age_sample_3 <- age[37:54, 3:23] 
 
 plot_data_3 <- data.frame(cbind(t(age_sample_3), timestamp))
 plot_data_test_3 <- melt(plot_data_3, id.vars = "timestamp")
@@ -244,7 +244,36 @@ fit1f %>% forecast(h = 5) %>% autoplot() + ylab("age population in next 5 years"
 # MTS Forecast (Sex) -- Cannot Run, Why?
 ```{r}
 # MTS Sex
+sex_mts <- ts(t(sex[1:2, 3:23]))
+model_sex_1 = VARMA(sex_mts, p=1, q=1, include.mean=FALSE)
+VARMApred(model_sex_1, h = 1, orig = 0)
 
+# MTS Sex
+sex_mts <- ts(t(sex[3:4, 3:23]))
+model_sex_3 = VARMA(sex_mts, p=1, q=1, include.mean=FALSE)
+VARMApred(model_sex_3, h = 1, orig = 0)
+
+# MTS Sex
+sex_mts <- ts(t(sex[29:30, 3:23]))
+model_sex_15 = VARMA(sex_mts, p=1, q=1, include.mean=FALSE)
+VARMApred(model_sex_15, h = 1, orig = 0)
+```
+# MTS Forecast (Age) -- Cannot Run, Why?
+```{r}
+# MTS Sex
+age_mts <- ts(t(age[1:18, 3:23]))
+model_age_1 = VARMA(age_mts, p=1, q=1, include.mean=FALSE)
+VARMApred(model_age_1, h = 1, orig = 0)
+
+# MTS Sex
+age_mts <- ts(t(age[37:54, 3:23]))
+model_age_3 = VARMA(age_mts, p=1, q=1, include.mean=FALSE)
+VARMApred(model_age_3, h = 1, orig = 0)
+
+# MTS Sex
+age_mts <- ts(t(age[271:288, 3:23]))
+model_age_15 = VARMA(age_mts, p=1, q=1, include.mean=FALSE)
+VARMApred(model_age_15, h = 1, orig = 0)
 ```
 
 # Save preprocessed time-series data (aggregated)
