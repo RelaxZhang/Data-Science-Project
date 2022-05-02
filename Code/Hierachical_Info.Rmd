@@ -237,7 +237,7 @@ fit15m %>% forecast(h = 5) %>% autoplot() + ylab("male population in next 5 year
 ```{r}
 # Sex ETS Forecast
 time_series = ts(unlist(age[13, 3:23], use.names = FALSE), start = c(1991), end = c(2011), frequency=1)
-fit1f <- ets(time_series)
+fit1f <- auto.arima(time_series)
 fit1f %>% forecast(h = 5) %>% autoplot() + ylab("age population in next 5 years")
 ```
 
