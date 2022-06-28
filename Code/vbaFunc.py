@@ -1,3 +1,5 @@
+import numpy
+
 '''Function for generating 3-Dimension jumpoffERP Array'''
 def jumpoff(numareas, numages, jumpoffERP, sheet_agesex, set_year_female, set_year_male):
     row = 3
@@ -12,18 +14,18 @@ def jumpoff(numareas, numages, jumpoffERP, sheet_agesex, set_year_female, set_ye
 
 '''Function for generating 1-Dimension xTFR Array'''
 def xTFR(jumpoffERP, result_xTFR, numareas):
-    for i in range(numareas):
 
+    for i in range(numareas):
         # Related age_sex group
-        male04 = jumpoffERP[i][1][0]
-        female04 = jumpoffERP[i][0][0]
-        female_1519 = jumpoffERP[i][0][3]
-        female_2024 = jumpoffERP[i][0][4]
-        female_2529 = jumpoffERP[i][0][5]
-        female_3034 = jumpoffERP[i][0][6]
-        female_3539 = jumpoffERP[i][0][7]
-        female_4044 = jumpoffERP[i][0][8]
-        female_4549 = jumpoffERP[i][0][9]
+        male04 = jumpoffERP[i, 1, 0]
+        female04 = jumpoffERP[i, 0, 0]
+        female_1519 = jumpoffERP[i, 0, 3]
+        female_2024 = jumpoffERP[i, 0, 4]
+        female_2529 = jumpoffERP[i, 0, 5]
+        female_3034 = jumpoffERP[i, 0, 6]
+        female_3539 = jumpoffERP[i, 0, 7]
+        female_4044 = jumpoffERP[i, 0, 8]
+        female_4549 = jumpoffERP[i, 0, 9]
         
         # Subjective definition for simplifying formula
         new_born = male04 + female04
@@ -102,8 +104,10 @@ def readSYI(final, sheet_label):
 '''Function for collecting Estimated & Projected Small Area Total Population'''
 def readSATP(intervals, sheet_SmallAreaTotals, numareas):
 
-    # Create list for storing Estimated & Projected Small Area Total Population Results
-    smallAreaTotalPop = [[None] * intervals] * numareas
+    # Create array for storing Estimated & Projected Small Area Total Population Results
+    smallAreaTotalPop = numpy.zeros((intervals, numareas))
+    smallAreaTotalPop[:] = numpy.nan
+    
     # Set start column for inserting / reading data
     row = 3
     if (intervals == 2):
@@ -117,7 +121,7 @@ def readSATP(intervals, sheet_SmallAreaTotals, numareas):
         SATP_col = int_col
         for a in range(intervals):
             SATP_col += 1
-            smallAreaTotalPop[a][i] = sheet_SmallAreaTotals.cell_value(row, SATP_col)
+            smallAreaTotalPop[a, i] = sheet_SmallAreaTotals.cell_value(row, SATP_col)
     
     # Return Small Area Total Population for specific range of years
     return smallAreaTotalPop
