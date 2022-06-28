@@ -15,15 +15,15 @@ def xTFR(jumpoffERP, result_xTFR, numareas):
     for i in range(numareas):
 
         # Related age_sex group
-        male04 = jumpoffERP[i, 1, 0]
-        female04 = jumpoffERP[i, 0, 0]
-        female_1519 = jumpoffERP[i, 0, 3]
-        female_2024 = jumpoffERP[i, 0, 4]
-        female_2529 = jumpoffERP[i, 0, 5]
-        female_3034 = jumpoffERP[i, 0, 6]
-        female_3539 = jumpoffERP[i, 0, 7]
-        female_4044 = jumpoffERP[i, 0, 8]
-        female_4549 = jumpoffERP[i, 0, 9]
+        male04 = jumpoffERP[i][1][0]
+        female04 = jumpoffERP[i][0][0]
+        female_1519 = jumpoffERP[i][0][3]
+        female_2024 = jumpoffERP[i][0][4]
+        female_2529 = jumpoffERP[i][0][5]
+        female_3034 = jumpoffERP[i][0][6]
+        female_3539 = jumpoffERP[i][0][7]
+        female_4044 = jumpoffERP[i][0][8]
+        female_4549 = jumpoffERP[i][0][9]
         
         # Subjective definition for simplifying formula
         new_born = male04 + female04
@@ -52,7 +52,7 @@ def readCNAPC(numareas, numages, lastage, sheet_label):
     AreaCode = [None] * numareas
     AreaName = [None] * numareas
     AgeLabel = [None] * numages
-    PCLabel = [None] * (lastage+1)
+    PCLabel = [None] * (lastage + 1)
 
     # Collect Area Code and Name
     row = 3
@@ -117,7 +117,7 @@ def readSATP(intervals, sheet_SmallAreaTotals, numareas):
         SATP_col = int_col
         for a in range(intervals):
             SATP_col += 1
-            smallAreaTotalPop[a, i] = sheet_SmallAreaTotals.cell_value(row, SATP_col)
+            smallAreaTotalPop[a][i] = sheet_SmallAreaTotals.cell_value(row, SATP_col)
     
     # Return Small Area Total Population for specific range of years
     return smallAreaTotalPop
