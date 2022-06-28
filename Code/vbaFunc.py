@@ -48,7 +48,7 @@ def clear_Input(worksheet):
 '''Function for collecting Area Codes, Names, Age Groups and Perid-Cohort Labels'''
 def readCNAPC(numareas, numages, lastage, sheet_label):
 
-    # Create empty Area Code, Name, Age Group Array for collection
+    # Create empty Area Code, Name, Age Group List for collection
     AreaCode = [None] * numareas
     AreaName = [None] * numareas
     AgeLabel = [None] * numages
@@ -79,7 +79,7 @@ def readCNAPC(numareas, numages, lastage, sheet_label):
 '''Function for collecting Sex, Year, Interval Labels'''
 def readSYI(final, sheet_label):
 
-    # Create empty Sex, Year, Interval Label Array for collection
+    # Create empty Sex, Year, Interval Label List for collection
     SexLabel = ['Females', 'Males']
     YearLabel = [None] * (final + 2)
     IntervalLabel = [None] * (final + 1)
@@ -98,3 +98,26 @@ def readSYI(final, sheet_label):
     
     # Return SexLabel, YearLabel, IntervalLabel
     return (SexLabel, YearLabel, IntervalLabel)
+
+'''Function for collecting Estimated & Projected Small Area Total Population'''
+def readSATP(intervals, sheet_SmallAreaTotals, numareas):
+
+    # Create list for storing Estimated & Projected Small Area Total Population Results
+    smallAreaTotalPop = [[None] * intervals] * numareas
+    # Set start column for inserting / reading data
+    row = 3
+    if (intervals == 2):
+        int_col = 2
+    else:
+        int_col = 3
+    
+    # Collect Small Area Total Population
+    for i in range(numareas):
+        row += 1
+        SATP_col = int_col
+        for a in range(intervals):
+            SATP_col += 1
+            smallAreaTotalPop[a, i] = sheet_SmallAreaTotals.cell_value(row, SATP_col)
+    
+    # Return Small Area Total Population for specific range of years
+    return smallAreaTotalPop
