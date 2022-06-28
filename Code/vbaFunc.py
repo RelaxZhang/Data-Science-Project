@@ -88,7 +88,7 @@ def readSYI(final, sheet_label):
     year_col = 2
     for i in range(final + 2):
         year_col += 1
-        YearLabel[i] = sheet_label.cell_value(2259, year_col)
+        YearLabel[i] = int(sheet_label.cell_value(2259, year_col))
     
     # Collect Interval Labels
     interval_col = 2
