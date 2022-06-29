@@ -302,7 +302,7 @@ def inputbirth(numareas, age_groups, ASFR_data, ERP, SRB):
         temptotbirths[i] = 0
 
         for a in range(age_groups):
-            tempbirths[a] = ASFR_data[0, i, a] * 2.5 * (ERP[0, i, 0, a] + ERP[1, i, 0, a])
+            tempbirths[a] = ASFR_data[0, i, a] * 2.5 * (ERP[0, i, 0, a + 3] + ERP[1, i, 0, a + 3])
             temptotbirths[i] += tempbirths[a]
 
         tempbirthssex[i, 0] = temptotbirths[i] * (100 / (SRB + 100))
