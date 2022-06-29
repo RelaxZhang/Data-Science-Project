@@ -38,6 +38,7 @@ def xTFR(jumpoffERP, result_xTFR, numareas):
     # Return xTRF result for storing into Fertility Sheet
     return result_xTFR
 
+#################################################################################################################################################################
 '''Function to clear the SmallAreaInputs before running the PrepareData Function if Input Data Already Exists'''
 def clear_Input(worksheet):
 
@@ -126,7 +127,7 @@ def readSATP(intervals, sheet_SmallAreaTotals, numareas):
     # Return Small Area Total Population for specific range of years
     return smallAreaTotalPop
 
-'''Function for recording ERP in small area with age & sex information'''
+'''Function for recording ERP (Estimated Resident Population) in small area with age & sex information'''
 def readERP(intervals, numareas, numages, sheet_agesex):
 
     # Create empty array for storing ERP in small area by age and sex
@@ -165,7 +166,7 @@ def readTFR(final, numareas, sheet_fertility):
     # Return TFR array
     return infoTFR
 
-'''Function to read in data for ASFRs and Preliminary ASFRs Model'''
+'''Function to read in data for ASFRs and Preliminary ASFRs (Area specific Fertility Rate)'''
 def readASFR(numareas, sheet_fertility, age_groups):
 
     # Create empty list and array for storing data
@@ -173,13 +174,13 @@ def readASFR(numareas, sheet_fertility, age_groups):
     prelimASFR = numpy.zeros((numareas, age_groups))
     prelimASFR[:] = numpy.nan
 
-    # Collect data for ASFRs Model
+    # Collect data for ASFRs
     row = 2258
     for i in range(age_groups):
         row += 1
         ASFR[i] = sheet_fertility.cell_value(row, 1)
     
-    # Collect data for preliminary ASFRs Model
+    # Collect data for preliminary ASFRs
     row = 5
     for i in range(numareas):
         row += 1
@@ -194,10 +195,10 @@ def readASFR(numareas, sheet_fertility, age_groups):
                 col += 1
                 prelimASFR[i, a] = 0
     
-    # Return ASFRs and Preliminary ASFRs Model's data
+    # Return ASFRs and Preliminary ASFRs data
     return ASFR, prelimASFR
 
-'''Function to collect Life Expectancy at Birth Assumptions, Mprtality Surface Information'''
+'''Function to collect Life Expectancy at Birth Assumptions, Mortality Surface Information'''
 def readLEMS(final, numareas, lastage, nLxMS, sheet_mortality):
     
     # Create empty array for storing Life expectancy and Mortality Surface
@@ -236,10 +237,10 @@ def readLEMS(final, numareas, lastage, nLxMS, sheet_mortality):
     # Return Life Expectancy and Mortality Surface Data
     return eO, MS_nLx, MS_TO
 
-'''Function of data collection for ASMRs model and Migration Information'''
+'''Function of data collection for ASMRs (Area specific Mortality Rate) and Migration Information'''
 def readMASMR(numareas, lastage, sheet_migration):
     
-    # Create empty list / array for storing data of migration and for ASMRs Model
+    # Create empty list / array for storing data of migration and for ASMRs
     totmig = [None] * numareas
     modelASMR = numpy.zeros((2, lastage + 1))
     modelASMR[:] = numpy.nan
@@ -254,7 +255,7 @@ def readMASMR(numareas, lastage, sheet_migration):
         if sheet_migration.cell_value(row_mig, 4) != '':
             totmig[i] = sheet_migration.cell_value(row_mig, 4)
     
-    # Collect ASMRs Model Data
+    # Collect ASMRs Data
     row_ASMR = 10
     for i in range(lastage + 1):
         row_ASMR += 1
@@ -263,5 +264,137 @@ def readMASMR(numareas, lastage, sheet_migration):
             col += 1
             modelASMR[a, i] = sheet_migration.cell_value(row_ASMR, col)
     
-    # Return Data of Migration and ASMRs Model
+    # Return Data of Migration and ASMRs
     return totmig, modelASMR
+
+#################################################################################################################################################################
+'''Function for Generating Input Data for ASFR (Area specific Fertility Rate)'''
+def inputASFR(final, numareas, age_groups, sheet_fertility, prelimASFR, modelASFR, TFR, modelTFR):
+    ASFR = numpy.zeros((final + 1, numareas, age_groups))
+    
+    # Collect ASFR input data
+    for y in range(final + 1):
+        row = 5
+        for i in range(numareas):
+            row += 1
+            if sheet_fertility.cell_value(row, 16) != "":
+                prelimtot = 0
+                for a in range(age_groups):
+                    prelimtot += prelimASFR[i, a]
+                for a in range(age_groups):
+                    ASFR[y, i, a] = prelimASFR[i, a] * TFR[y, i] / (prelimtot * 5)
+            else:
+                for a in range(age_groups):
+                    ASFR[y, i, a] = modelASFR[a] * TFR[y, i] / modelTFR
+    
+    # Return ASFR input Data
+    return ASFR
+
+'''Function for estimating base periold birth by sex'''
+def inputbirth(numareas, age_groups, ASFR_data, ERP, SRB):
+
+    tempbirths = [None] * age_groups            # Amount of Each Age group female could give birth to
+    tempbirthssex = numpy.zeros((numareas, 2))  # Total estimate birth in different sex
+    temptotbirths = [None] * numareas           # Total estimate birth
+
+    # Collect estimated total birth population and sex birth population
+    for i in range(numareas):
+        temptotbirths[i] = 0
+
+        for a in range(age_groups):
+            tempbirths[a] = ASFR_data[0, i, a] * 2.5 * (ERP[0, i, 0, a] + ERP[1, i, 0, a])
+            temptotbirths[i] += tempbirths[a]
+
+        tempbirthssex[i, 0] = temptotbirths[i] * (100 / (SRB + 100))
+        tempbirthssex[i, 1] = temptotbirths[i] * (SRB / (SRB + 100))
+    
+    # Return tempbirthssex, temptotbirths estimation data
+    return tempbirthssex, temptotbirths
+
+'''Function for generating ASDR Input Data for further usage'''
+def inputASDR(final, numareas, lastage, nLxMS, eO, MS_TO, MS_nLx):
+    
+    # Create empty array for storing ASDR input data
+    ASDR = numpy.zeros((final + 1, numareas, 2, lastage + 1))
+
+    for i in range(numareas):
+        Lower_TO = numpy.zeros((final + 1, 2))
+        Upper_TO = numpy.zeros((final + 1, 2))
+        Lower_num = numpy.zeros((final + 1, 2))
+        Upper_num = numpy.zeros((final + 1, 2))
+        proportion = numpy.zeros((final + 1, 2))
+
+        # Find out where in the mortality surface each eO lies
+        for y in range(final + 1):
+            for s in range(2):
+                for z in range(nLxMS - 1):
+                    e0_100k = eO[y, i, s] * 100000
+                    if (e0_100k >= MS_TO[z, s] and e0_100k < MS_TO[z + 1, s]):
+                        Upper_TO[y, s] = MS_TO[z + 1, s]
+                        Upper_num[y, s] = z + 1
+                        Lower_TO[y, s] = MS_TO[z, s]
+                        Lower_num[y, s] = z
+                        proportion[y, s] = (e0_100k - Lower_TO[y, s]) / (Upper_TO[y, s] - Lower_TO[y, s])
+                        break
+
+        # Create nLx values for each eO
+        nLx = numpy.zeros((final + 1, 2, lastage + 1))
+        for y in range(final + 1):
+            for s in range(2):
+                lower = 0 # Ensure there is lower value without the above loop
+                upper = 0 # Ensure there is upper value without the above loop
+                lower = int(Lower_num[y, s])
+                upper = int(Upper_num[y, s])
+                for a in range(lastage + 1):
+                    MS_low = MS_nLx[lower, s, a]
+                    MS_up = MS_nLx[upper, s, a]
+                    nLx[y, s, a] = MS_low + proportion[y, s] * (MS_up - MS_low)
+        
+        # Create Period-Cohort ASDRs (Area Specific Death Rates)
+        for y in range(final + 1):
+            for s in range(2):
+                
+                # Record Area Specific Death Rate for age groups excluding 0-4 and 85+
+                for pc in range(1, lastage):
+                    younger = nLx[y, s, pc - 1]
+                    elder = nLx[y, s, pc]
+                    ASDR[y, i, s, pc] = (younger - elder) / (5 / 2 * (younger + elder))
+                
+                # Record ASDR for 0-4
+                ASDR[y, i, s, 0] = ((5 * 100000) - nLx[y, s, 0]) / (5 / 2 * nLx[y, s, 0])
+                # Record ASDR for 85+
+                younger = nLx[y, s, lastage - 1]
+                elder = nLx[y, s, lastage]
+                ASDR[y, i, s, lastage] = ((younger + elder) - elder) / (5 / 2 * (younger + elder + elder))
+    
+    # Return Area Specific Death Rates Input Data
+    return ASDR
+
+'''Function for calculating the estimated bas period deaths for the population accounts'''
+def inputdeath(numareas, lastage, ASDR, ERP):
+
+    tempdeaths = numpy.zeros((numareas, 2, lastage + 1))  # Number of death in each age-sex group
+    temptotdeaths = [None] * numareas                     # Total estimate death
+
+    # Record number of death in each age-sex cohort
+    for i in range(numareas):
+        for s in range(2):
+            # Record estimated Deaths for age-sex groups excluding 0-4 and 85+
+            for pc in range(1, lastage):
+                tempdeaths[i, s, pc] = ASDR[0, i, s, pc] * 2.5 * (ERP[0, i, s, pc - 1] + ERP[1, i, s, pc])
+            # Record Deaths for 0-4
+            tempdeaths[i, s, 0] = ASDR[0, i, s, 0] * 2.5 * ERP[1, i, s, 0]
+            # Record Deaths for 85+
+            younger = ERP[0, i, s, lastage - 1]
+            elder_f = ERP[0, i, s, lastage]
+            elder_m = ERP[1, i, s, lastage]
+            tempdeaths[i, s, lastage] = ASDR[0, i, s, lastage] * 2.5 * (younger + elder_f + elder_m)
+
+        # Record estimated total death
+        temptotdeaths[i] = 0
+        for s in range(2):
+            for pc in range(lastage + 1):
+                temptotdeaths[i] += tempdeaths[i, s, pc]
+        
+    # Return tempdeaths, temptotdeaths estimation data
+    return tempdeaths, temptotdeaths
