@@ -579,3 +579,136 @@ def inputMigration(final, numareas, lastage, modelASMR, ERP, totmig, TotPop, tem
     
     # Return migration input data
     return ASOMR, inward, outward, prelimmig, scaledmig, prelimbaseinward, prelimbaseoutward, cohortnetmig, adjnetmig, scalingfactor2a, scalingfactor2b
+
+#################################################################################################################################################################
+'''Function for writing inputs Accounts'''
+def writeAccount(wb_wt_Accounts, numareas, Areaname, lastage, sexlabel, pclabel, tempbirthssex, inward, outward, prelimmig, scaledmig, prelimbaseinward, prelimbaseoutward, cohortnetmig, adjnetmig, scalingfactor2a, scalingfactor2b, ERP, tempdeaths):
+    
+    # Record headings of Accounts
+    wb_wt_Accounts.cell(3, 3).value = "ERP(t-5)"
+    wb_wt_Accounts.cell(3, 4).value = "Deaths"
+    wb_wt_Accounts.cell(3, 5).value = "Net mig"
+    wb_wt_Accounts.cell(3, 6).value = "ERP(t)"
+    wb_wt_Accounts.cell(3, 8).value = "Prelim mig (model rates x pop-at-risk)"
+    wb_wt_Accounts.cell(3, 9).value = "Scaled mig (adjusted for pop size)"
+    wb_wt_Accounts.cell(3, 10).value = "Prelim in (consistent with total net mig)"
+    wb_wt_Accounts.cell(3, 11).value = "Prelim out (consistent with total net mig)"
+    wb_wt_Accounts.cell(3, 12).value = "scaling factor a (unsmoothed)"
+    wb_wt_Accounts.cell(3, 13).value = "scaling factor b (smoothed)"
+    wb_wt_Accounts.cell(3, 14).value = "In-mig (consistent with cohort net mig)"
+    wb_wt_Accounts.cell(3, 15).value = "Out-mig (consistent with cohort net mig)"
+    wb_wt_Accounts.cell(3, 16).value = "Adjusted net mig"
+
+    # Record input data of Accounts
+    row = 3
+    for i in range(numareas):
+
+        # Record area name for each sector of input data in Accounts Sheet
+        row += 1
+        wb_wt_Accounts.cell(row, 1).value = str(i + 1) + " " + Areaname[i]
+
+        for s in range(2):
+            for pc in range(lastage + 1):
+                row += 1
+
+                # Record sex and age-cohort label
+                wb_wt_Accounts.cell(row, 1).value = sexlabel[s]
+                wb_wt_Accounts.cell(row, 2).value = pclabel[pc]
+
+                # Record ERP(t-5)
+                if (pc == 0):
+                    wb_wt_Accounts.cell(row, 3).value = tempbirthssex[i, s]
+                elif (pc > 0 and pc < lastage):
+                    wb_wt_Accounts.cell(row, 3).value = ERP[0, i, s, pc]
+                else:
+                    wb_wt_Accounts.cell(row, 3).value = ERP[0, i, s, lastage - 1] + ERP[0, i, s, lastage]
+                
+                wb_wt_Accounts.cell(row, 4).value = tempdeaths[i, s, pc]         # Record estimated death
+                wb_wt_Accounts.cell(row, 5).value = cohortnetmig[i, s, pc]       # Record cohort net migration
+                wb_wt_Accounts.cell(row, 6).value = ERP[1, i, s, pc]             # Record estimated resident population
+                wb_wt_Accounts.cell(row, 8).value = prelimmig[i, s, pc]          # Record preliminary migration
+                wb_wt_Accounts.cell(row, 9).value = scaledmig[i, s, pc]          # Record scaled migration
+                wb_wt_Accounts.cell(row, 10).value = prelimbaseinward[i, s, pc]  # Record preliminary inward migration
+                wb_wt_Accounts.cell(row, 11).value = prelimbaseoutward[i, s, pc] # Record preliminary outward migration
+                wb_wt_Accounts.cell(row, 12).value = scalingfactor2a[i, s, pc]   # Record raw scaling factor 
+                wb_wt_Accounts.cell(row, 13).value = scalingfactor2b[i, s, pc]   # Record smoothed scaling factor
+                wb_wt_Accounts.cell(row, 14).value = inward[0, i, s, pc]         # Record inward migration
+                wb_wt_Accounts.cell(row, 15).value = outward[i, s, pc]           # Record outward migration
+                wb_wt_Accounts.cell(row, 16).value = adjnetmig[i, s, pc]         # Record new migration
+        
+        # Create an empty row for spliting data table
+        row += 1
+    
+    # Return the Accounts Sheet
+    return wb_wt_Accounts
+
+'''Sub-function for writing input data (Headings) to SmallAreaInputs Sheet'''
+def writeSAIHead(head, final, intervallabel, wb_wt_SmallAreaInputs, col):
+    for y in range(1, final + 1):
+        col += 1
+        wb_wt_SmallAreaInputs.cell(3, col).value = head
+        wb_wt_SmallAreaInputs.cell(4, col).value = intervallabel[y]
+    col += 1
+    return col, wb_wt_SmallAreaInputs
+
+'''Sub-function for writing input data to SmallAreaInputs Sheet'''
+def writeSAIData(final, dataset, wb_wt_SmallAreaInputs, col, row, sex, area, age_group):
+    for y in range(1, final + 1):
+        col += 1
+        wb_wt_SmallAreaInputs.cell(row, col).value = dataset[y, area, sex, age_group]
+    col += 1
+    return col, wb_wt_SmallAreaInputs
+
+'''Function for writing input data to SmallAreaInputs Sheet'''
+def writeSAI(wb_wt_SmallAreaInputs, intervallabel, numareas, lastage, final, Areacode, Areaname, pclabel, ASDR, ASOMR, inward, agelabel, ASFR):
+    col = 4
+
+    # Record Headings for SmallAreaInputs sheet
+    col, wb_wt_SmallAreaInputs = writeSAIHead("F ASDRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = writeSAIHead("M ASDRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = writeSAIHead("F ASOMRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = writeSAIHead("M ASOMRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = writeSAIHead("F inward", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = writeSAIHead("M inward", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = writeSAIHead("ASFRs", final, intervallabel, wb_wt_SmallAreaInputs, col + 1)
+
+    # Record ASDR, ASOMR, inward migration, ASFR input data
+    row = 4
+    for i in range(numareas):
+        for pc in range(lastage + 1):
+
+            # Record row name for each age-sex cohort input data in each area
+            row += 1
+            wb_wt_SmallAreaInputs.cell(row, 1).value = i
+            wb_wt_SmallAreaInputs.cell(row, 2).value = Areacode[i]
+            wb_wt_SmallAreaInputs.cell(row, 3).value = Areaname[i]
+            wb_wt_SmallAreaInputs.cell(row, 4).value = pclabel[pc]
+            col = 4
+
+            # Record input data (ASDR, ASOMR, inward) into SmallAreaInputs sheet
+            col, wb_wt_SmallAreaInputs = writeSAIData(final, ASDR, wb_wt_SmallAreaInputs, col, row, 0, i, pc)
+            col, wb_wt_SmallAreaInputs = writeSAIData(final, ASDR, wb_wt_SmallAreaInputs, col, row, 1, i, pc)
+            col, wb_wt_SmallAreaInputs = writeSAIData(final, ASOMR, wb_wt_SmallAreaInputs, col, row, 0, i, pc)
+            col, wb_wt_SmallAreaInputs = writeSAIData(final, ASOMR, wb_wt_SmallAreaInputs, col, row, 1, i, pc)
+            col, wb_wt_SmallAreaInputs = writeSAIData(final, inward, wb_wt_SmallAreaInputs, col, row, 0, i, pc)
+            col, wb_wt_SmallAreaInputs = writeSAIData(final, inward, wb_wt_SmallAreaInputs, col, row, 1, i, pc)
+
+    # Record ASFRs input data
+    row = 8
+    birthcol = col + 1
+    for i in range(numareas):
+        for a in range(7):
+            # Record headings of ASFRs
+            row += 1
+            col = birthcol
+            wb_wt_SmallAreaInputs.cell(row, birthcol).value = agelabel[a + 3]
+
+            for y in range(1, final + 1):
+                col += 1
+                wb_wt_SmallAreaInputs.cell(row, col).value = ASFR[y, i, a]
+        row += 11
+    
+    # Return the SmallAreaInputs Sheet
+    return wb_wt_SmallAreaInputs
+
+#################################################################################################################################################################
