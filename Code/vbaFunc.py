@@ -712,3 +712,105 @@ def writeSAI(wb_wt_SmallAreaInputs, intervallabel, numareas, lastage, final, Are
     return wb_wt_SmallAreaInputs
 
 #################################################################################################################################################################
+'''Function for read in National Projection Data'''
+def readNatP(final, numages, sheet_NationalProjection):
+
+    # Create empty array for storing National Projection data
+    NatP = numpy.zeros((final + 1, 2, numages))
+
+    # Load in national projection data
+    row = 3
+    for s in range(2):
+        for a in range(numages):
+            row += 1
+            col = 2
+            for y in range(final + 1):
+                col += 1
+                NatP[y, s, a] = sheet_NationalProjection.cell_value(row, col)
+    
+    # Return National Projection data
+    return NatP
+
+'''Function for reading in national projected birth, deaths, new migration data for projection'''
+def readBDN(final, lastage, sheet_NationalProjection):
+    
+    # Create empty array for storing birth, death, net migration data
+    NatB = numpy.zeros((final, 2))
+    NatDpc = numpy.zeros((final, 2, lastage + 1))
+    NatNpc = numpy.zeros((final, 2, lastage + 1))
+
+    # Read in data
+    col = 2
+    for y in range(final):
+        col += 1
+        NatB[y, 0] = sheet_NationalProjection.cell_value(43, col)
+        NatB[y, 1] = sheet_NationalProjection.cell_value(44, col)
+    
+    row = 47
+    for s in range(2):
+        for pc in range(lastage + 1):
+            row += 1
+            col = 2
+            for y in range(final):
+                col += 1
+                NatDpc[y, s, pc] = sheet_NationalProjection.cell_value(row, col)
+    
+    row = 86
+    for s in range(2):
+        for pc in range(lastage + 1):
+            row += 1
+            col = 2
+            for y in range(final):
+                col += 1
+                NatNpc[y, s, pc] = sheet_NationalProjection.cell_value(row, col)
+    
+    # Return national projected birth, deaths, net migration data
+    return NatB, NatDpc, NatNpc
+
+'''Function for writting column names in selected sheet'''
+def writeCheckMD(final, lastage, intervallabel, sexlabel, pclabel, sheet):
+    row = 4
+    for y in range(final):
+        for s in range(2):
+            for pc in range(lastage + 1):
+                row += 1
+                sheet.cell(row, 1).value = intervallabel[y + 1]
+                sheet.cell(row, 2).value = sexlabel[s]
+                sheet.cell(row, 3).value = pclabel[pc]
+        row += 2
+    return sheet
+
+'''Function for writing headings / row name in CheckMig, CheckDeaths, Log Sheets'''
+def writeNoteCL(numareas, lastage, wb_wt_CheckMig, wb_wt_CheckDeaths, wb_wt_Log, intervallabel, sexlabel, pclabel, Areaname, final):
+    
+    # Column name in CheckMig Sheet
+    col = 3
+    for i in range(numareas):
+        col += 1
+        wb_wt_CheckMig.cell(2, col).value = i + 1
+        wb_wt_CheckMig.cell(2, col + 3 + numareas).value = i + 1
+        wb_wt_CheckMig.cell(3, col).value = Areaname[i]
+        wb_wt_CheckMig.cell(3, col + 3 + numareas).value = Areaname[i]
+    wb_wt_CheckMig.cell(3, col + 4 + numareas).value = "National net mig"
+
+    # Column name in CheckDeath Sheet
+    col = 3
+    for i in range(numareas):
+        col += 1
+        wb_wt_CheckDeaths.cell(2, col).value = i + 1
+        wb_wt_CheckDeaths.cell(3, col).value = Areaname[i]
+    wb_wt_CheckDeaths.cell(3, col + 1).value = "National deaths"
+
+    # Row notation / name in CheckMig Sheet
+    wb_wt_CheckMig = writeCheckMD(final, lastage, intervallabel, sexlabel, pclabel, wb_wt_CheckMig)
+
+    # Row notation / name in CheckDeath Sheet
+    wb_wt_CheckDeaths = writeCheckMD(final, lastage, intervallabel, sexlabel, pclabel, wb_wt_CheckDeaths)
+
+    # Headings in Log Sheet
+    wb_wt_Log.cell(1, 1).value = "No. of iterations"
+    wb_wt_Log.cell(3, 1).value = "Projection interval"
+    wb_wt_Log.cell(3, 2).value = "Population-at-risk iterations"
+    wb_wt_Log.cell(3, 3).value = "Mig adjustment iterations"
+
+    return wb_wt_CheckMig, wb_wt_CheckDeaths, wb_wt_Log
