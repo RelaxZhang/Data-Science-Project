@@ -398,3 +398,184 @@ def inputdeath(numareas, lastage, ASDR, ERP):
         
     # Return tempdeaths, temptotdeaths estimation data
     return tempdeaths, temptotdeaths
+
+'''Function for calculating migration input data'''
+def inputMigration(final, numareas, lastage, modelASMR, ERP, totmig, TotPop, temptotdeaths, temptotbirths, tempdeaths, tempbirthssex, ASDR, Areaname, sexlabel, pclabel, intervallabel):
+
+    # Create empty array for storing migration related data
+    ASOMR = numpy.zeros((final + 1, numareas, 2, lastage + 1))  # Area Specific Out Migration Ratio
+    inward = numpy.zeros((final + 1, numareas, 2, lastage + 1)) # Inward migration amount
+    outward = numpy.zeros((numareas, 2, lastage + 1))           # Outward migration amount
+    prelimmig = numpy.zeros((numareas, 2, lastage + 1))         # Prelimium migration
+    scaledmig = numpy.zeros((numareas, 2, lastage + 1))         # Scaled migration
+    prelimbaseinward = numpy.zeros((numareas, 2, lastage + 1))  # Prelimium inward migration
+    prelimbaseoutward = numpy.zeros((numareas, 2, lastage + 1)) # Prelimium outward migration
+    cohortnetmig = numpy.zeros((numareas, 2, lastage + 1))      # Cohort net migration
+    adjnetmig = numpy.zeros((numareas, 2, lastage + 1))         # Adjuested net migration
+    scalingfactor2a = numpy.zeros((numareas, 2, lastage + 1))   # Raw scaling factor
+    scalingfactor2b = numpy.zeros((numareas, 2, lastage + 1))   # Smoothed scaling factor
+
+    # Collecting Migration Input Data
+    for i in range(numareas):
+
+        # Generate preliminary migration turnover by sex-age cohort based on model rates
+        for s in range(2):
+            # Generate preliminary migration turnover for all sex-age cohorts exclude 0-4, 85+
+            for pc in range(1, lastage):
+                prelimmig[i, s, pc] = modelASMR[s, pc] * 2.5 * (ERP[0, i, s, pc - 1] + ERP[1, i, s, pc])
+
+            # Generate preliminary migration turnover for 0-4
+            prelimmig[i, s, 0] = modelASMR[s, 0] * 2.5 * ERP[1, i, s, 0]
+
+            # Generate preliminary migration turnover for 85+
+            prelimmig[i, s, lastage] = modelASMR[s, lastage] * 2.5 * (ERP[0, i, s, lastage - 1] + ERP[0, i, s, lastage] + ERP[1, i, s, lastage])
+
+        # Generate total preliminarymigration turnover value
+        totprelimmig = 0
+        for s in range(2):
+            for pc in range(lastage + 1):
+                totprelimmig += prelimmig[i, s, pc]
+        
+        # Collecting scaled preliminary migration by sex-age cohort to migration turnover 
+        # as calculated by the crude migration turnover rate; and then divide by 2 to give the initial inward and outward migration
+        for s in range(2):
+            for pc in range(lastage + 1):
+                scaledmig[i, s, pc] = prelimmig[i, s, pc] * (0.5 * totmig[i]) / totprelimmig
+
+        # Calculate residual net migration for base period in each area i
+        basenetmig = TotPop[1, i] - TotPop[0, i] + temptotdeaths[i] - temptotbirths[i]
+
+        # Calculate the scaling factor to estimate separate inward and outward migration totals which are consistent with residual net migration
+        scalingfactor1 = (basenetmig + (basenetmig ** 2 + (4 * 0.5 * totmig[i] * 0.5 * totmig[i])) ** 0.5) / (2 * 0.5 * totmig[i])
+
+        # Calculate preliminary inward and outward migration by sex-age cohort (Different with the Original Value in 'Account')
+        for s in range(2):
+            for pc in range(lastage + 1):
+                prelimbaseinward[i, s, pc] = scaledmig[i, s, pc] * scalingfactor1
+                prelimbaseoutward[i, s, pc] = scaledmig[i, s, pc] / scalingfactor1
+
+        # Calculate cohort-specific residual net migration (for adjustment usage)
+        for s in range(2):
+            # Generate cohort-specific residual net migration for all sex-age cohorts exclude 0-4, 85+
+            for pc in range(1, lastage):
+                cohortnetmig[i, s, pc] = ERP[1, i, s, pc] - ERP[0, i, s, pc - 1] + tempdeaths[i, s, pc]
+            
+            # Generate cohort-specific residual net migration for 0-4
+            cohortnetmig[i, s, 0] = ERP[1, i, s, 0] - tempbirthssex[i, s] + tempdeaths[i, s, 0]
+
+            # Generate cohort-specific residual net migration for 85+
+            cohortnetmig[i, s, lastage] = ERP[1, i, s, lastage] - (ERP[0, i, s, lastage - 1] + ERP[0, i, s, lastage]) + tempdeaths[i, s, lastage]
+
+        # Adjusted cohort-specific net migration with averaged over sex for selected ages
+        for s in range(2):
+            for pc in range(14):
+                adjnetmig[i, s, pc] = 0.5 * (cohortnetmig[i, 0, pc] + cohortnetmig[i, 1, pc])
+            for pc in range(14, lastage + 1):
+                adjnetmig[i, s, pc] = cohortnetmig[i, s, pc]
+        
+        # Calculate scaling factors to adjust directional migration (Raw & Smoothed)
+        # (a) Raw Scaling factor
+        for s in range(2):
+            for pc in range(lastage + 1):
+                if prelimbaseinward[i, s, pc] > 0:
+                    adjmig = adjnetmig[i, s, pc]
+                    preinward = prelimbaseinward[i, s, pc]
+                    preoutward = prelimbaseoutward[i, s, pc]
+                    scalingfactor2a[i, s, pc] = (adjmig + (adjmig ** 2 + (4 * preinward * preoutward)) ** 0.5) / (2 * preinward)
+                else:
+                    scalingfactor2a[i, s, pc] = 1
+        
+        # (b) Smoothed Scaling factor
+        for s in range(2):
+            for pc in range(lastage + 1):
+                if (pc < 10):
+                    scalingfactor2b[i, s, pc] = scalingfactor2a[i, s, pc]
+                elif (pc == lastage):
+                    scalingfactor2b[i, s, pc] = 1 / 2 * (scalingfactor2a[i, s, pc - 1] + scalingfactor2a[i, s, pc])
+                else:
+                    scalingfactor2b[i, s, pc] = 1 / 3 * (scalingfactor2a[i, s, pc - 1] + scalingfactor2a[i, s, pc] + scalingfactor2a[i, s, pc + 1])
+                
+                # Further guarantee of no too extreme scaling factor value
+                if (scalingfactor2b[i, s, pc] > 10):
+                    scalingfactor2b[i, s, pc] = 10
+                elif(scalingfactor2b[i, s, pc] < 0.1):
+                    scalingfactor2b[i, s, pc] = 0.1
+
+        # Adjust inward and outward migration with smoothed scaling factor
+        for s in range(2):
+            for pc in range(lastage + 1):
+                inward[0, i, s, pc] = prelimbaseinward[i, s, pc] * scalingfactor2b[i, s, pc]
+                outward[i, s, pc] = prelimbaseoutward[i, s, pc] / scalingfactor2b[i, s, pc]
+        
+        # Smoothing inward migration age profiles at selected age groups
+        intemp = numpy.zeros((2, lastage + 1))
+        for s in range(2):
+            for pc in range(lastage + 1):
+                intemp[s, pc] = inward[0, i, s, pc]
+        for s in range(2):
+            for pc in range(0, lastage - 1):
+                inward[0, i, s, pc] = intemp[s, pc]
+            for pc in range(lastage - 1, lastage + 1):
+                inward[0, i, s, pc] = 1 / 2 * (intemp[0, pc] + intemp[1, pc])
+        
+        # Calculate ASOMR (Area Specific Out Migration Rate)
+        for s in range(2):
+            # Record ASOMR input for all sex-age cohort exclude 0-4 & 85+
+            for pc in range(1, lastage):
+                if (ERP[0, i, s, pc - 1] + ERP[1, i, s, pc] > 0):
+                    ASOMR[0, i, s, pc] = outward[i, s, pc] / (2.5 * (ERP[0, i, s, pc - 1] + ERP[1, i, s, pc]))
+                else:
+                    ASOMR[0, i, s, pc] = 0
+                    print("Warning: Base period out-migration rate canoot be calculated due to zero population")
+                    print("Aera = ", Areaname[i], " & Sex = ", sexlabel[s], " & Period-Cohort = ", pclabel[pc])
+            
+            # Record ASOMR input for sex-age cohort 0-4
+            if (ERP[1, i, s, 0] > 0):
+                ASOMR[0, i, s, 0] = outward[i, s, 0] / (2.5 * ERP[1, i, s, 0])
+            else:
+                ASOMR[0, i, s, 0] = 0
+                print("Warning: Base period out-migration rate canoot be calculated due to zero population")
+                print("Aera = ", Areaname[i], " & Sex = ", sexlabel[s], " & Period-Cohort = ", pclabel[0])
+                
+            # Record ASOMR inpurt for sex age ohort 85+
+            if (ERP[0, i, s, lastage - 1] + ERP[0, i, s, lastage]) > 0:
+                ASOMR[0, i, s, lastage] = outward[i, s, lastage] / (2.5 * (ERP[0, i, s, lastage - 1] + ERP[0, i, s, lastage] + ERP[1, i, s, lastage]))
+            else:
+                ASOMR[0, i, s, lastage] = 0
+        
+        # Smoothing ASOMR at selected age groups
+        outtemp = numpy.zeros((2, lastage + 1))
+        for s in range(2):
+            for pc in range(lastage + 1):
+                outtemp[s, pc] = ASOMR[0, i, s, pc]
+        # Start smoothing
+        for s in range(2):
+            # When for the first 11 groups, keep ASOMR unchanged
+            for pc in range(11):
+                ASOMR[0, i, s, pc] = outtemp[s, pc]
+            
+            # Smooth the rest of the elder age groups ASOMR
+            for pc in range(11, lastage + 1):
+                ASOMR[0, i, s, pc] = 1 / 2 * (outtemp[0, pc] + outtemp[1, pc])
+        
+        # Set default ASOMR and Inward migration projection on the future 3 year intervals (20-25, 25-30, 40-35)
+        for y in range(1, final + 1):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    ASOMR[y, i, s, pc] = ASOMR[0, i, s, pc]
+                    inward[y, i, s, pc] = inward[0, i, s, pc]
+        
+        # Check that ASOMRs + ASDR do not exceed 0.4 & Adjust ASOMRs if necessary
+        # Helps to avoid negative population if there is no inward migration because pop-at-risk = 2.5 * (Pop0 + Pop1)
+        for y in range(final + 1):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    if (ASOMR[y, i, s, pc] + ASDR[y, i, s, pc] > 0.5):
+                        temprate = ASOMR[y, i, s, pc]
+                        ASOMR[y, i, s, pc] = 0.4 - ASDR[y, i, s, pc]
+                        print("Warning: Excessive outward migration rate reducing")
+                        print("Avoid having outward migration rate + age-specific death rate from exceeding 0.4")
+                        print("Old rate = ", temprate, " & New rate = ", ASOMR[y, i, s, pc], " & Area = ", Areaname[i], " & Sex = ", sexlabel[s], " & Period-Cohort = ", pclabel[pc], " & Interval = ", intervallabel[y])
+    
+    # Return migration input data
+    return ASOMR, inward, outward, prelimmig, scaledmig, prelimbaseinward, prelimbaseoutward, cohortnetmig, adjnetmig, scalingfactor2a, scalingfactor2b
