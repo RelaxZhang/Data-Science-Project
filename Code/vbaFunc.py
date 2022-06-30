@@ -128,7 +128,7 @@ def readSATP(intervals, sheet_SmallAreaTotals, numareas):
     return smallAreaTotalPop
 
 '''Function for recording ERP (Estimated Resident Population) in small area with age & sex information'''
-def readERP(intervals, numareas, numages, sheet_agesex):
+def readERP(intervals, numareas, numages, sheet_agesex, project):
 
     # Create empty array for storing ERP in small area by age and sex
     infoERP = numpy.zeros((intervals, numareas, 2, numages))
@@ -140,10 +140,14 @@ def readERP(intervals, numareas, numages, sheet_agesex):
         for i in range(numareas):
             for a in range(numages):
                 row += 1
+                if (project):
+                    index = year + 1
+                else:
+                    index = year
                 # Females
-                infoERP[year, i, 0, a] = sheet_agesex.cell_value(row, 6 + year)
+                infoERP[year, i, 0, a] = sheet_agesex.cell_value(row, 6 + index)
                 # Males
-                infoERP[year, i, 1, a] = sheet_agesex.cell_value(row, 4 + year)
+                infoERP[year, i, 1, a] = sheet_agesex.cell_value(row, 4 + index)
     
     # Return ERP data with given year range(s)
     return infoERP
