@@ -818,3 +818,156 @@ def writeNoteCL(numareas, lastage, wb_wt_CheckMig, wb_wt_CheckDeaths, wb_wt_Log,
     wb_wt_Log.cell(3, 3).value = "Mig adjustment iterations"
 
     return wb_wt_CheckMig, wb_wt_CheckDeaths, wb_wt_Log
+
+'''Function for setting initial value of jump-off year population'''
+def readIniPop(final, numareas, numages, ERP):
+    Population = numpy.zeros((final + 1, numareas, 2, numages))
+
+    # record initial (jump-off year) population from ERP dataset
+    for i in range(numareas):
+        for s in range(2):
+            for pc in range(numages):
+                Population[0, i, s, pc] = ERP[0, i, s, pc]
+    
+    # Return initial population dataset (the rest 3 levels are used for storing the projection)
+    return Population
+
+'''Function for recording the total population in jump-off year in each area'''
+def readIniTPop(final, numareas, numages, Population):
+    totPopulation = numpy.zeros((final + 1, numareas))
+
+    # Record jump-off year total population in each area
+    for i in range(numareas):
+        totPopulation[0, i] = 0
+        for s in range(2):
+            for a in range(numages):
+                totPopulation[0, i] += Population[0, i, s, a]
+    
+    # Return total polulation of jump-off year (the rest 3 levels are used for storing the projection)
+    return totPopulation
+
+'''Function for generating scaled inward and outward migration projection'''
+def NetMigAdjustment2(labely, prelimIMpc, prelimOMpc, NatN, requiredN, LocalPop0, LocalDpc, scaledIM, scaledOM, numareas, lastage, maxziter, smallnumber, wb_wt_Log):
+
+    totN1 = 0
+    for i in range(numareas):
+        totN1 += requiredN[i]
+    
+    totN2 = 0
+    for s in range(2):
+        for pc in range(lastage + 1):
+            totN2 += NatN[s, pc]
+
+    IM1 = numpy.zeros((numareas, 2, lastage + 1))
+    OM1 = numpy.zeros((numareas, 2, lastage + 1))
+    for i in range(numareas):
+        for s in range(2):
+            for pc in range(lastage + 1):
+                IM1[i, s, pc] = prelimIMpc[i, s, pc]
+                OM1[i, s, pc] = prelimOMpc[i, s, pc]
+    
+    for z in range(maxziter):
+
+        # Record the number of iterations required
+        wb_wt_Log.cell(3 + labely, 3).value = z
+
+        # Calculate inward & outward migration by sex and period-cohort summed over 
+        totIM1 = numpy.zeros((2, lastage + 1))
+        totOM1 = numpy.zeros((2, lastage + 1))
+        for i in range(numareas):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    totIM1[s, pc] += IM1[i, s, pc]
+                    totOM1[s, pc] += OM1[i, s, pc]
+
+        # Calculate the scaling factors
+        sf = numpy.zeros((2, lastage + 1))
+        for s in range(2):
+            for pc in range(lastage + 1):
+                if (totIM1[s, pc] > 0):
+                    sf[s, pc] = (NatN[s, pc] + (((NatN[s, pc] ** 2) + (4 * totIM1[s, pc] * totOM1[s, pc])) ** 0.5)) / (2 * totIM1[s, pc])
+        
+        # Make inward & outward migration flows consistent with national net migration by sex-age cohorts
+        IM2 = numpy.zeros((numareas, 2, lastage + 1))
+        OM2 = numpy.zeros((numareas, 2, lastage + 1))
+        for i in range(numareas):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    IM2[i, s, pc] = IM1[i, s, pc] * sf[s, pc]
+                    OM2[i, s, pc] = OM1[i, s, pc] / sf[s, pc]
+        
+        # Calculate inward & outward migration for each area summed over sex and age cohort
+        totIM2 = numpy.zeros((numareas))
+        totOM2 = numpy.zeros((numareas))
+        for i in range(numareas):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    totIM2[i] += IM2[i, s, pc]
+                    totOM2[i] += OM2[i, s, pc]
+        
+        # Calculate required total inward migration
+        totin = numpy.zeros((numareas))
+        for i in range(numareas):
+            totin[i] = requiredN[i] + totOM2[i]
+        
+        # Adjust inward migration so that it gives the required local net migration total
+        IM3 = numpy.zeros((numareas, 2, lastage + 1))
+        OM3 = numpy.zeros((numareas, 2, lastage + 1))
+        for i in range(numareas):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    IM3[i, s, pc] = IM2[i, s, pc] * totin[i] / totIM2[i]
+                    OM3[i, s, pc] = OM2[i, s, pc]
+        
+        # Check to ensure that net migration does not given a -ve population and adjust migration flows if necessary
+        IM4 = numpy.zeros((numareas, 2, lastage + 1))
+        OM4 = numpy.zeros((numareas, 2, lastage + 1))
+        for i in range(numareas):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    tempcheck = LocalPop0[i, s, pc] - LocalDpc[i, s, pc] - OM3[i, s, pc] + IM3[i, s, pc]
+                    if tempcheck < 0:
+                        OM4[i, s, pc] = OM3[i, s, pc] + 0.6 * tempcheck
+                        IM4[i, s, pc] = IM3[i, s, pc] - 0.6 * tempcheck
+                        print("Warning: Migration flows had to be adjusted to avoid negative population")
+                    else:
+                        IM4[i, s, pc] = IM3[i, s, pc]
+                        OM4[i, s, pc] = OM3[i, s, pc]
+        
+        # Check the difference between IM, OM 1 and 4 matrices
+        diffr = numpy.zeros((2, numareas, 2, lastage + 1))
+        for i in range(numareas):
+            for s in range(2):
+                for pc in range(lastage + 1):
+                    diffr[0, i, s, pc] = abs(IM4[i, s, pc] - IM1[i, s, pc])
+                    diffr[1, i, s, pc] = abs(OM4[i, s, pc] - OM1[i, s, pc])
+        
+        checkOK = numpy.zeros((2, numareas, 2, lastage + 1))
+        totcheckOK = 0
+        for k in range(2):
+            for i in range(numareas):
+                for s in range(2):
+                    for pc in range(lastage + 1):
+                        if diffr[k, i, s, pc] < smallnumber:
+                            checkOK[k, i, s, pc] = 0
+                        else:
+                            checkOK[k, i, s, pc] = 1
+                        totcheckOK += checkOK[k, i, s, pc]
+        
+        # Check convergence
+        if totcheckOK == 0:
+            for i in range(numareas):
+                for s in range(2):
+                    for pc in range(lastage + 1):
+                        scaledIM[i, s, pc] = IM4[i, s, pc]
+                        scaledOM[i, s, pc] = OM4[i, s, pc]
+            return (scaledIM, scaledOM)
+        else:
+            IM1 = numpy.zeros((numareas, 2, lastage + 1))
+            OM1 = numpy.zeros((numareas, 2, lastage + 1))
+            for i in range(numareas):
+                for s in range(2):
+                    for pc in range(lastage + 1):
+                        IM1[i, s, pc] = IM4[i, s, pc]
+                        OM1[i, s, pc] = OM4[i, s, pc]
+        # Continue looping
