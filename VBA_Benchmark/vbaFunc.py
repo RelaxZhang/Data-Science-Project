@@ -1051,10 +1051,8 @@ def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearl
     # Select the age-sex data as list
     jump_female = (Population[jump_index, area_index, 0]).tolist()
     jump_male = (Population[jump_index, area_index, 1] * (-1)).tolist()
-    jump_pop = jump_female + jump_male
     proj_female = (Population[proj_index, area_index, 0]).tolist()
     proj_male = (Population[proj_index, area_index, 1] * (-1)).tolist()
-    proj_pop = proj_female + proj_male
 
     # Write target value into Graphs for Visualisation
     wb_wt_Target.cell(1, 1).value = "Summary of Population Projections"
@@ -1062,22 +1060,27 @@ def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearl
     wb_wt_Target.cell(5, 1).value = str(area_index + 1) + " " + Target_Area
     wb_wt_Target.cell(7, 1).value = "Selected Projection Year"
     wb_wt_Target.cell(8, 1).value = Proj_Year
-    wb_wt_Target.cell(10, 3).value = "Jump-off"
-    wb_wt_Target.cell(10, 4).value = "Projection"
+    wb_wt_Target.cell(10, 1).value = "Age"
+    wb_wt_Target.cell(10, 2).value = "Jump-off-female"
+    wb_wt_Target.cell(10, 3).value = "Jump-off-male"
+    wb_wt_Target.cell(10, 4).value = "Age" 
+    wb_wt_Target.cell(10, 5).value = "Projection-female"
+    wb_wt_Target.cell(10, 6).value = "Projection-male"
 
     # Write age, sex labels to Target Sheet
     row = 11
-    for s in range(2):
-        for i in range(numages):
-            wb_wt_Target.cell(row, 1).value = sexlabel[s]
-            wb_wt_Target.cell(row, 2).value = agelabel[i]
-            row += 1
+    for i in range(numages):
+        wb_wt_Target.cell(row, 1).value = agelabel[i]
+        wb_wt_Target.cell(row, 4).value = agelabel[i]
+        row += 1
 
     # Write jump-off, projection data to Graphs Sheet
     row = 11
-    for i in range(len(jump_pop)):
-        wb_wt_Target.cell(row, 3).value = jump_pop[i]
-        wb_wt_Target.cell(row, 4).value = proj_pop[i]
+    for i in range(numages):
+        wb_wt_Target.cell(row, 2).value = jump_female[i]
+        wb_wt_Target.cell(row, 3).value = jump_male[i]
+        wb_wt_Target.cell(row, 5).value = proj_female[i]
+        wb_wt_Target.cell(row, 6).value = proj_male[i]
         row += 1
     
     return wb_wt_Target
