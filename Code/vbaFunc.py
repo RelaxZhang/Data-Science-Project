@@ -1,5 +1,9 @@
 import numpy
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
+#################################################################################################################################################################
 '''Function for generating 3-Dimension jumpoffERP Array'''
 def jumpoff(numareas, numages, jumpoffERP, sheet_agesex, set_year_female, set_year_male):
     row = 3
@@ -1024,6 +1028,7 @@ def writeProj(wb_wt_AgeSexForecasts, wb_wt_Components, yearlabel, intervallabel,
         
         col = 1
         for y in range(1, final + 1):
+            col += 1
             wb_wt_Components.cell(row + 1, col).value = totPopulation[y - 1, i]
             wb_wt_Components.cell(row + 2, col).value = Btot[y - 1, i]
             wb_wt_Components.cell(row + 3, col).value = Dtot[y - 1, i]
@@ -1035,3 +1040,44 @@ def writeProj(wb_wt_AgeSexForecasts, wb_wt_Components, yearlabel, intervallabel,
     return wb_wt_AgeSexForecasts, wb_wt_Components
 
 #################################################################################################################################################################
+'''Function for writing target data into Sheet for visualisation'''
+def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearlabel, Population):
+
+    # Select the target area and year
+    area_index = Areaname.index(Target_Area)
+    jump_index = yearlabel.index(Jump_Year) - 1
+    proj_index = yearlabel.index(Proj_Year) - 1
+
+    # Select the age-sex data as list
+    jump_female = (Population[jump_index, area_index, 0]).tolist()
+    jump_male = (Population[jump_index, area_index, 1] * (-1)).tolist()
+    jump_pop = jump_female + jump_male
+    proj_female = (Population[proj_index, area_index, 0]).tolist()
+    proj_male = (Population[proj_index, area_index, 1] * (-1)).tolist()
+    proj_pop = proj_female + proj_male
+
+    # Write target value into Graphs for Visualisation
+    wb_wt_Target.cell(1, 1).value = "Summary of Population Projections"
+    wb_wt_Target.cell(3, 1).value = "Selected Area"
+    wb_wt_Target.cell(5, 1).value = str(area_index + 1) + " " + Target_Area
+    wb_wt_Target.cell(7, 1).value = "Selected Projection Year"
+    wb_wt_Target.cell(8, 1).value = Proj_Year
+    wb_wt_Target.cell(10, 3).value = "Jump-off"
+    wb_wt_Target.cell(10, 4).value = "Projection"
+
+    # Write age, sex labels to Target Sheet
+    row = 11
+    for s in range(2):
+        for i in range(numages):
+            wb_wt_Target.cell(row, 1).value = sexlabel[s]
+            wb_wt_Target.cell(row, 2).value = agelabel[i]
+            row += 1
+
+    # Write jump-off, projection data to Graphs Sheet
+    row = 11
+    for i in range(len(jump_pop)):
+        wb_wt_Target.cell(row, 3).value = jump_pop[i]
+        wb_wt_Target.cell(row, 4).value = proj_pop[i]
+        row += 1
+    
+    return wb_wt_Target
