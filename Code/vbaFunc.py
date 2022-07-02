@@ -971,3 +971,67 @@ def NetMigAdjustment2(labely, prelimIMpc, prelimOMpc, NatN, requiredN, LocalPop0
                         IM1[i, s, pc] = IM4[i, s, pc]
                         OM1[i, s, pc] = OM4[i, s, pc]
         # Continue looping
+
+#################################################################################################################################################################
+'''Function for writing projection data into the worksheet'''
+def writeProj(wb_wt_AgeSexForecasts, wb_wt_Components, yearlabel, intervallabel, Areacode, Areaname, sexlabel, agelabel, numareas, numages, final, \
+              Population, totPopulation, Btot, Dtot, totN):
+
+    # Write to Sheet 'AgeSexForecast'
+    row = 3
+    col = 5
+    wb_wt_AgeSexForecasts.cell(row, 1).value = "No."
+    wb_wt_AgeSexForecasts.cell(row, 2).value = "Code"
+    wb_wt_AgeSexForecasts.cell(row, 3).value = "Area name"
+    wb_wt_AgeSexForecasts.cell(row, 4).value = "Sex"
+    wb_wt_AgeSexForecasts.cell(row, 5).value = "Age group"
+
+    for y in range(final + 1):
+        col += 1
+        wb_wt_AgeSexForecasts.cell(3, col).value = yearlabel[y + 1]
+
+    # Write in projection population
+    row = 3
+    for i in range(numareas):
+        for s in range(2):
+            for a in range(numages):
+                row += 1
+                wb_wt_AgeSexForecasts.cell(row, 1).value = str(i + 1)
+                wb_wt_AgeSexForecasts.cell(row, 2).value = Areacode[i]
+                wb_wt_AgeSexForecasts.cell(row, 3).value = Areaname[i]
+                wb_wt_AgeSexForecasts.cell(row, 4).value = sexlabel[s]
+                wb_wt_AgeSexForecasts.cell(row, 5).value = agelabel[a]
+                col = 5
+                for y in range(final + 1):
+                    col += 1
+                    wb_wt_AgeSexForecasts.cell(row, col).value = Population[y, i, s, a]
+
+    # Write to Sheet 'Component'
+    row = 3
+    col = 1
+    for y in range(1, final + 1):
+        col += 1
+        wb_wt_Components.cell(row, col).value = intervallabel[y]
+
+    for i in range(numareas):
+        row += 1
+        wb_wt_Components.cell(row, 1).value = str(i + 1) + " " + Areaname[i]
+        wb_wt_Components.cell(row + 1, 1).value = "Start-of-period population"
+        wb_wt_Components.cell(row + 2, 1).value = "Births"
+        wb_wt_Components.cell(row + 3, 1).value = "Deaths"
+        wb_wt_Components.cell(row + 4, 1).value = "Net migration"
+        wb_wt_Components.cell(row + 5, 1).value = "End-of-period population"
+        
+        col = 1
+        for y in range(1, final + 1):
+            wb_wt_Components.cell(row + 1, col).value = totPopulation[y - 1, i]
+            wb_wt_Components.cell(row + 2, col).value = Btot[y - 1, i]
+            wb_wt_Components.cell(row + 3, col).value = Dtot[y - 1, i]
+            wb_wt_Components.cell(row + 4, col).value = totN[y - 1, i]
+            wb_wt_Components.cell(row + 5, col).value = totPopulation[y, i]
+        row += 6
+    
+    # Return the Projection data sheets
+    return wb_wt_AgeSexForecasts, wb_wt_Components
+
+#################################################################################################################################################################
