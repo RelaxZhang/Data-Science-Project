@@ -1041,7 +1041,7 @@ def writeProj(wb_wt_AgeSexForecasts, wb_wt_Components, yearlabel, intervallabel,
 
 #################################################################################################################################################################
 '''Function for writing target data into Sheet for visualisation'''
-def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearlabel, Population):
+def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearlabel, Population, numages, sexlabel, agelabel):
 
     # Select the target area and year
     area_index = Areaname.index(Target_Area)
