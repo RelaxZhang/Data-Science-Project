@@ -1,0 +1,336 @@
+No.,Code,Area name
+1,10102,Queanbeyan
+2,10103,Snowy Mountains
+3,10104,South Coast
+4,10105,Goulburn - Mulwaree
+5,10106,Young - Yass
+6,10201,Gosford
+7,10202,Wyong
+8,10301,Bathurst
+9,10302,Lachlan Valley
+10,10303,Lithgow - Mudgee
+11,10304,Orange
+12,10401,Clarence Valley
+13,10402,Coffs Harbour
+14,10501,Bourke - Cobar - Coonamble
+15,10502,Broken Hill and Far West
+16,10503,Dubbo
+17,10601,Lower Hunter
+18,10602,Maitland
+19,10603,Port Stephens
+20,10604,Upper Hunter
+21,10701,Dapto - Port Kembla
+22,10703,Kiama - Shellharbour
+23,10704,Wollongong
+24,10801,Great Lakes
+25,10802,Kempsey - Nambucca
+26,10804,Port Macquarie
+27,10805,Taree - Gloucester
+28,10901,Albury
+29,10902,Lower Murray
+30,10903,Upper Murray exc. Albury
+31,11001,Armidale
+32,11002,Inverell - Tenterfield
+33,11003,Moree - Narrabri
+34,11004,Tamworth - Gunnedah
+35,11101,Lake Macquarie - East
+36,11102,Lake Macquarie - West
+37,11103,Newcastle
+38,11201,Richmond Valley - Coastal
+39,11202,Richmond Valley - Hinterland
+40,11203,Tweed Valley
+41,11301,Griffith - Murrumbidgee (West)
+42,11302,Tumut - Tumbarumba
+43,11303,Wagga Wagga
+44,11401,Shoalhaven
+45,11402,Southern Highlands
+46,11501,Baulkham Hills
+47,11502,Dural - Wisemans Ferry
+48,11503,Hawkesbury
+49,11504,Rouse Hill - McGraths Hill
+50,11601,Blacktown
+51,11602,Blacktown - North
+52,11603,Mount Druitt
+53,11701,Botany
+54,11702,Marrickville - Sydenham - Petersham
+55,11703,Sydney Inner City
+56,11801,Eastern Suburbs - North
+57,11802,Eastern Suburbs - South
+58,11901,Bankstown
+59,11902,Canterbury
+60,11903,Hurstville
+61,11904,Kogarah - Rockdale
+62,12001,Canada Bay
+63,12002,Leichhardt
+64,12003,Strathfield - Burwood - Ashfield
+65,12101,Chatswood - Lane Cove
+66,12102,Hornsby
+67,12103,Ku-ring-gai
+68,12104,North Sydney - Mosman
+69,12201,Manly
+70,12202,Pittwater
+71,12203,Warringah
+72,12301,Camden
+73,12302,Campbelltown (NSW)
+74,12303,Wollondilly
+75,12401,Blue Mountains
+76,12403,Penrith
+77,12404,Richmond - Windsor
+78,12405,St Marys
+79,12501,Auburn
+80,12502,Carlingford
+81,12503,Merrylands - Guildford
+82,12504,Parramatta
+83,12601,Pennant Hills - Epping
+84,12602,Ryde - Hunters Hill
+85,12701,Bringelly - Green Valley
+86,12702,Fairfield
+87,12703,Liverpool
+88,12801,Cronulla - Miranda - Caringbah
+89,12802,Sutherland - Menai - Heathcote
+90,19999,NSW remainder
+91,20101,Ballarat
+92,20102,Creswick - Daylesford - Ballan
+93,20103,Maryborough - Pyrenees
+94,20201,Bendigo
+95,20202,Heathcote - Castlemaine - Kyneton
+96,20203,Loddon - Elmore
+97,20301,Barwon - West
+98,20302,Geelong
+99,20303,Surf Coast - Bellarine Peninsula
+100,20401,Upper Goulburn Valley
+101,20402,Wangaratta - Benalla
+102,20403,Wodonga - Alpine
+103,20501,Baw Baw
+104,20502,Gippsland - East
+105,20503,Gippsland - South West
+106,20504,Latrobe Valley
+107,20505,Wellington
+108,20601,Brunswick - Coburg
+109,20602,Darebin - South
+110,20603,Essendon
+111,20604,Melbourne City
+112,20605,Port Phillip
+113,20606,Stonnington - West
+114,20607,Yarra
+115,20701,Boroondara
+116,20702,Manningham - West
+117,20703,Whitehorse - West
+118,20801,Bayside
+119,20802,Glen Eira
+120,20803,Kingston
+121,20804,Stonnington - East
+122,20901,Banyule
+123,20902,Darebin - North
+124,20903,Nillumbik - Kinglake
+125,20904,Whittlesea - Wallan
+126,21001,Keilor
+127,21002,Macedon Ranges
+128,21003,Moreland - North
+129,21004,Sunbury
+130,21005,Tullamarine - Broadmeadows
+131,21101,Knox
+132,21102,Manningham - East
+133,21103,Maroondah
+134,21104,Whitehorse - East
+135,21105,Yarra Ranges
+136,21201,Cardinia
+137,21202,Casey - North
+138,21203,Casey - South
+139,21204,Dandenong
+140,21205,Monash
+141,21301,Brimbank
+142,21302,Hobsons Bay
+143,21303,Maribyrnong
+144,21304,Melton - Bacchus Marsh
+145,21305,Wyndham
+146,21401,Frankston
+147,21402,Mornington Peninsula
+148,21501,Grampians
+149,21502,Mildura
+150,21503,Murray River - Swan Hill
+151,21601,Campaspe
+152,21602,Moira
+153,21603,Shepparton
+154,21701,Glenelg - Southern Grampians
+155,21703,Colac - Corangamite
+156,21704,Warrnambool
+157,30101,Capalaba
+158,30102,Cleveland - Stradbroke
+159,30103,Wynnum - Manly
+160,30201,Bald Hills - Everton Park
+161,30202,Chermside
+162,30203,Nundah
+163,30204,Sandgate
+164,30301,Carindale
+165,30302,Holland Park - Yeronga
+166,30303,Mt Gravatt
+167,30304,Nathan
+168,30305,Rocklea - Acacia Ridge
+169,30306,Sunnybank
+170,30401,Centenary
+171,30402,Kenmore - Brookfield - Moggill
+172,30403,Sherwood - Indooroopilly
+173,30404,The Gap - Enoggera
+174,30501,Brisbane Inner
+175,30502,Brisbane Inner - East
+176,30503,Brisbane Inner - North
+177,30504,Brisbane Inner - West
+178,30601,Cairns - North
+179,30602,Cairns - South
+180,30603,Innisfail - Cassowary Coast
+181,30604,Port Douglas - Daintree
+182,30605,Tablelands (East) - Kuranda
+183,30701,Darling Downs (West) - Maranoa
+184,30702,Darling Downs - East
+185,30703,Granite Belt
+186,30801,Central Highlands (Qld)
+187,30803,Rockhampton
+188,30804,Biloela
+189,30805,Gladstone
+190,30901,Broadbeach - Burleigh
+191,30902,Coolangatta
+192,30903,Gold Coast - North
+193,30904,Gold Coast Hinterland
+194,30905,Mudgeeraba - Tallebudgera
+195,30906,Nerang
+196,30907,Ormeau - Oxenford
+197,30908,Robina
+198,30909,Southport
+199,30910,Surfers Paradise
+200,31001,Forest Lake - Oxley
+201,31002,Ipswich Hinterland
+202,31003,Ipswich Inner
+203,31004,Springfield - Redbank
+204,31101,Beaudesert
+205,31102,Beenleigh
+206,31103,Browns Plains
+207,31104,Jimboomba
+208,31105,Loganlea - Carbrook
+209,31106,Springwood - Kingston
+210,31201,Bowen Basin - North
+211,31202,Mackay
+212,31203,Whitsunday
+213,31301,Bribie - Beachmere
+214,31302,Caboolture
+215,31303,Caboolture Hinterland
+216,31304,Narangba - Burpengary
+217,31305,Redcliffe
+218,31401,The Hills District
+219,31402,North Lakes
+220,31403,Strathpine
+221,31501,Far North
+222,31502,Outback - North
+223,31503,Outback - South
+224,31601,Buderim
+225,31602,Caloundra
+226,31603,Maroochy
+227,31605,Noosa
+228,31606,Sunshine Coast Hinterland
+229,31607,Nambour
+230,31608,Noosa Hinterland
+231,31701,Toowoomba
+232,31801,Charters Towers - Ayr - Ingham
+233,31802,Townsville
+234,31901,Bundaberg
+235,31902,Burnett
+236,31903,Gympie - Cooloola
+237,31904,Hervey Bay
+238,31905,Maryborough
+239,40101,Adelaide City
+240,40102,Adelaide Hills
+241,40103,Burnside
+242,40104,Campbelltown (SA)
+243,40105,Norwood - Payneham - St Peters
+244,40106,Prospect - Walkerville
+245,40107,Unley
+246,40201,Gawler - Two Wells
+247,40202,Playford
+248,40203,Port Adelaide - East
+249,40204,Salisbury
+250,40205,Tea Tree Gully
+251,40301,Holdfast Bay
+252,40302,Marion
+253,40303,Mitcham
+254,40304,Onkaparinga
+255,40401,Charles Sturt
+256,40402,Port Adelaide - West
+257,40403,West Torrens
+258,40501,Barossa
+259,40502,Lower North
+260,40503,Mid North
+261,40504,Yorke Peninsula
+262,40601,Eyre Peninsula and South West
+263,40602,Outback - North and East
+264,40701,Fleurieu - Kangaroo Island
+265,40702,Limestone Coast
+266,40703,Murray and Mallee
+267,50101,Augusta - Margaret River - Busselton
+268,50102,Bunbury
+269,50103,Manjimup
+270,50201,Mandurah
+271,50301,Cottesloe - Claremont
+272,50302,Perth City
+273,50401,Bayswater - Bassendean
+274,50402,Mundaring
+275,50403,Swan
+276,50501,Joondalup
+277,50502,Stirling
+278,50503,Wanneroo
+279,50601,Armadale
+280,50602,Belmont - Victoria Park
+281,50603,Canning
+282,50604,Gosnells
+283,50605,Kalamunda
+284,50606,Serpentine - Jarrahdale
+285,50607,South Perth
+286,50701,Cockburn
+287,50702,Fremantle
+288,50703,Kwinana
+289,50704,Melville
+290,50705,Rockingham
+291,50901,Albany
+292,50902,Wheat Belt - North
+293,50903,Wheat Belt - South
+294,51001,Kimberley
+295,51002,East Pilbara
+296,51003,West Pilbara
+297,51101,Esperance
+298,51102,Gascoyne
+299,51103,Goldfields
+300,51104,Mid West
+301,60101,Brighton
+302,60102,Hobart - North East
+303,60103,Hobart - North West
+304,60104,Hobart - South and West
+305,60105,Hobart Inner
+306,60106,Sorell - Dodges Ferry
+307,60201,Launceston
+308,60202,Meander Valley - West Tamar
+309,60203,North East
+310,60301,Central Highlands (Tas.)
+311,60302,Huon - Bruny Island
+312,60303,South East Coast
+313,60401,Burnie - Ulverstone
+314,60402,Devonport
+315,60403,West Coast
+316,70101,Darwin City
+317,70102,Darwin Suburbs
+318,70103,Litchfield
+319,70104,Palmerston
+320,70201,Alice Springs
+321,70202,Barkly
+322,70203,Daly - Tiwi - West Arnhem
+323,70204,East Arnhem
+324,70205,Katherine
+325,80101,Belconnen
+326,80103,Canberra East
+327,80104,Gungahlin
+328,80105,North Canberra
+329,80106,South Canberra
+330,80107,Tuggeranong
+331,80108,Weston Creek
+332,80109,Woden Valley
+333,80110,Molonglo
+334,80111,Urriarra - Namadgi
+335,90109,Other Territories
