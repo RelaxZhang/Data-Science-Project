@@ -1,0 +1,109 @@
+---
+title: "vbaR"
+author: "Chi Zhang"
+date: "05/07/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Import Package(s) & Function(s)
+```{r}
+source("vbaFunc.R")
+```
+
+# Read in CSV file for generating input data
+```{r pressure, echo=FALSE}
+age_cohorts <- read.csv("./Input_CSV/age_cohorts.csv")
+labels_other_key <- read.csv("./Input_CSV/labels_other_key.csv")
+labels <- read.csv("./Input_CSV/labels.csv")
+AgeSexERPs <- read.csv("./Input_CSV/AgeSexERPs.csv")
+SmallAreaTotals <- read.csv("./Input_CSV/SmallAreaTotals.csv")
+LifeExpectancy <- read.csv("./Input_CSV/LifeExpectancy.csv")
+Mortality <- read.csv("./Input_CSV/Mortality.csv")
+ASFR_Prelim <- read.csv("./Input_CSV/ASFR_Prelim.csv")
+otherFertility <- read.csv("./Input_CSV/otherFertility.csv")
+migRate <- read.csv("./Input_CSV/migRate.csv")
+migTurnover <- read.csv("./Input_CSV/migTurnover.csv")
+TotPopulation <- read.csv("./Input_CSV/TotPopulation.csv")
+totBirth <- read.csv("./Input_CSV/totBirth.csv")
+totDeath <- read.csv("./Input_CSV/totDeath.csv")
+totNetMig <- read.csv("./Input_CSV/totNetMig.csv")
+```
+
+# Define Variables
+```{r}
+numareas = labels_other_key[1, 7]       # Number of small areas
+numages = age_cohorts[18, 1]            # Number of age groups in ERPs
+lastage = age_cohorts[18, 3]            # Number of period cohorts
+final = labels_other_key[1, 6]          # Final projection year number
+SRB = otherFertility[1, 3]              # Sex Ratio at Birth (Male : Female)
+modelTFR  = otherFertility[1, 2]        # Model TFR Parameter
+nLxMS = length(Mortality) - 2           # nLx mortality surface groups
+age_ASFR = length(otherFertility[, 1])  # Age groups amount in ASFRs
+```
+
+# xTRF
+```{r}
+# Read in jumpoffERP Data
+jumpoffERP = jumpoffERP_Func(AgeSexERPs, numages, numareas, 6, 8)
+
+# Generate xTFR vector for storing
+result_xTFR = xTFR(jumpoffERP, numareas)
+```
+
+# PrepareData
+## Start Generating Input Data
+### Read in Data for Generating Input Data
+```{r}
+# Labels
+Areacode = labels[, 2]
+Areaname = labels[, 3]
+agelabel = age_cohorts[, 2]
+pclabel = age_cohorts[, 4]
+sexlabel = totBirth[, 1]
+yearlabel = labels_other_key[1:(final + 2), 1]
+intervallabel = labels_other_key[1:(final + 1), 1]
+
+# Estimated & Projected Small Area Total Population (Aggregated)
+TotPop = t(SmallAreaTotals[, 5:(5+final)])
+
+# ERP (Estimated Resident Population) by age & sex (before and at jumpoff year)
+ERP = readERP(2, numareas, numages, AgeSexERPs, FALSE)
+
+# Area-specific TFRs
+TFR = data.frame(result_xTFR, result_xTFR, result_xTFR, result_xTFR)
+colnames(TFR) = labels_other_key[1:(1+final), 2]
+TFR = t(TFR)
+
+# Read in data for ASFRs and Preliminary ASFRs (Area specific fertility Rate)
+modelASFR = otherFertility[, 1]
+prelimASFR = ASFR_Prelim
+
+# Read in data for Life Expectancy and Mortality Surface
+EM_Result = readLEMS(final, numareas, numages, nLxMS, LifeExpectancy, Mortality)
+eO = EM_Result$eO
+MS_nLx = EM_Result$MS_nLx
+MS_TO = data.frame(cbind(t(Mortality[1+numages, 3:(3+nLxMS-1)]), t(Mortality[(1+numages)*2, 3:(3+nLxMS-1)])))
+
+# Read in data of migration data and for ASMRs (Area specific Mortality Rate)
+totmig = migTurnover[, 4]
+modelASMR = t(migRate[, 2:3])
+```
+
+### Some Checks
+```{r}
+
+```
+
+### Calculate Input Data
+```{r}
+
+```
+
+### Write Input Data to Worksheet
+```{r}
+
+```
