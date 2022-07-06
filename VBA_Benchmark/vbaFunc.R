@@ -99,3 +99,342 @@ readLEMS <- function(final, numareas, numages, nLxMS, expectancy, mortality){
 }
 
 ################################################################################
+# Function for Generating Input Data for ASFR (Area specific Fertility Rate)
+inputASFR <- function(final, numareas, age_groups, prelimASFR, modelASFR, TFR, modelTFR){
+  
+  # Create empty array for storing ASFR input Data
+  ASFR <- array(rep(0, (final+1) * numareas * age_groups), dim=c((final+1), numareas, age_groups))
+  
+  # Collect ASFR input data
+  for (y in 1:(final + 1)){
+    row = 0
+    for (i in 1:numareas){
+      row = row + 1
+      if (prelimASFR[row, 1] != 0){
+        prelimtot = 0
+        for (a in 1:age_groups){
+          prelimtot = prelimtot + prelimASFR[i, a]}
+        for (a in 1:age_groups){
+          ASFR[y, i, a] = prelimASFR[i, a] * TFR[y, i] / (prelimtot * 5)}}
+      else{
+        for (a in 1:age_groups){
+          ASFR[y, i, a] = modelASFR[a] * TFR[y, i] / modelTFR}}}}
+
+  # Return ASFR input Data
+  return (ASFR)
+}
+
+# Function for estimating base periold birth by sex
+inputbirth <- function(numareas, age_groups, ASFR_data, ERP, SRB){
+  
+  # Amount of Each Age group female could give birth to
+  tempbirths = rep(0, age_groups)
+  # Total estimate birth in different sex
+  tempbirthssex = array(rep(0, numareas * 2), dim=c(numareas, 2))
+  # Total estimate birth
+  temptotbirths = rep(0, numareas)
+
+  # Collect estimated total birth population and sex birth population
+  for (i in 1:numareas){
+    temptotbirths[i] = 0
+
+    for (a in 1:age_groups){
+      tempbirths[a] = ASFR_data[1, i, a] * 2.5 * (ERP[1, i, 1, a + 3] + ERP[2, i, 1, a + 3])
+      temptotbirths[i] = temptotbirths[i] + tempbirths[a]}
+
+    tempbirthssex[i, 1] = temptotbirths[i] * (100 / (SRB + 100))
+    tempbirthssex[i, 2] = temptotbirths[i] * (SRB / (SRB + 100))}
+
+  # Return tempbirthssex, temptotbirths estimation data
+  return (list("tempsex" = tempbirthssex, "temp" = temptotbirths))
+}
+
+# Function for generating ASDR Input Data for further usage
+inputASDR <- function(final, numareas, lastage, nLxMS, eO, MS_TO, MS_nLx){
+  
+  # Create empty array for storing ASDR input data
+  ASDR = array(rep(0, (final+1) * numareas * 2 * (lastage+1)), dim=c((final+1), numareas, 2, (lastage+1)))
+
+  for (i in 1:numareas){
+    Lower_TO = array(rep(0, (final + 1) * 2), dim=c((final + 1), 2))
+    Upper_TO = array(rep(0, (final + 1) * 2), dim=c((final + 1), 2))
+    Lower_num = array(rep(0, (final + 1) * 2), dim=c((final + 1), 2))
+    Upper_num = array(rep(0, (final + 1) * 2), dim=c((final + 1), 2))
+    proportion = array(rep(0, (final + 1) * 2), dim=c((final + 1), 2))
+
+    # Find out where in the mortality surface each eO lies
+    for (y in 1:(final + 1)){
+      for (s in 1:2){
+        for (z in 1:(nLxMS - 1)){
+          e0_100k = eO[y, i, s] * 100000
+          if (e0_100k >= MS_TO[z, s] & e0_100k < MS_TO[z + 1, s]){
+            Upper_TO[y, s] = MS_TO[z + 1, s]
+            Upper_num[y, s] = z + 1
+            Lower_TO[y, s] = MS_TO[z, s]
+            Lower_num[y, s] = z
+            proportion[y, s] = (e0_100k - Lower_TO[y, s]) / (Upper_TO[y, s] - Lower_TO[y, s])
+            break}}}}
+
+    # Create nLx values for each eO
+    nLx = array(rep(0, (final + 1) * 2 * (lastage + 1)), dim=c((final + 1), 2, (lastage + 1)))
+    for (y in 1:(final + 1)){
+      for (s in 1:2){
+        lower = 0 # Ensure there is lower value without the above loop
+        upper = 0 # Ensure there is upper value without the above loop
+        lower = Lower_num[y, s]
+        upper = Upper_num[y, s]
+        for (a in 1:(lastage + 1)){
+          MS_low = MS_nLx[lower, s, a]
+          MS_up = MS_nLx[upper, s, a]
+          nLx[y, s, a] = MS_low + proportion[y, s] * (MS_up - MS_low)}}}
+
+    # Create Period-Cohort ASDRs (Area Specific Death Rates)
+    for (y in 1:(final + 1)){
+      for (s in 1:2){
+      
+        # Record Area Specific Death Rate for age groups excluding 0-4 and 85+
+        for (pc in 2:lastage){
+          younger = nLx[y, s, pc-1]
+          elder = nLx[y, s, pc]
+          ASDR[y, i, s, pc] = (younger - elder) / (5 / 2 * (younger + elder))}
+
+        # Record ASDR for 0-4
+        ASDR[y, i, s, 1] = ((5 * 100000) - nLx[y, s, 1]) / (5 / 2 * nLx[y, s, 1])
+        # Record ASDR for 85+
+        younger = nLx[y, s, lastage]
+        elder = nLx[y, s, lastage+1]
+        ASDR[y, i, s, lastage+1] = ((younger + elder) - elder) / (5 / 2 * (younger + elder + elder))}}}
+
+  # Return Area Specific Death Rates Input Data
+  return (ASDR)
+}
+
+# Function for calculating the estimated bas period deaths for the population accounts
+inputdeath <- function(numareas, lastage, ASDR, ERP){
+  
+  # Number of death in each age-sex group
+  tempdeaths = array(rep(0, numareas * 2 * (lastage + 1)), dim=c(numareas, 2, (lastage + 1)))
+  # Total estimate death
+  temptotdeaths = rep(0, numareas)
+
+  # Record number of death in each age-sex cohort
+  for (i in 1:numareas){
+    for (s in 1:2){
+      # Record estimated Deaths for age-sex groups excluding 0-4 and 85+
+      for (pc in 2:lastage){
+        tempdeaths[i, s, pc] = ASDR[1, i, s, pc] * 2.5 * (ERP[1, i, s, pc - 1] + ERP[2, i, s, pc])
+      # Record Deaths for 0-4
+      tempdeaths[i, s, 1] = ASDR[1, i, s, 1] * 2.5 * ERP[2, i, s, 1]
+      # Record Deaths for 85+
+      younger = ERP[1, i, s, lastage]
+      elder_f = ERP[1, i, s, lastage + 1]
+      elder_m = ERP[2, i, s, lastage + 1]
+      tempdeaths[i, s, lastage + 1] = ASDR[1, i, s, lastage + 1] * 2.5 * (younger + elder_f + elder_m)
+      }
+    }
+    # Record estimated total death
+    temptotdeaths[i] = 0
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        temptotdeaths[i] = temptotdeaths[i] + tempdeaths[i, s, pc]}}}
+
+  # Return tempdeaths, temptotdeaths estimation data
+  return (list("deaths" = tempdeaths, "totdeaths" = temptotdeaths))
+}
+
+# Function for calculating migration input data
+inputMigration <- function(final, numareas, lastage, modelASMR, ERP, totmig, TotPop, temptotdeaths,
+                           temptotbirths, tempdeaths, tempbirthssex, ASDR, Areaname, sexlabel, pclabel, intervallabel){
+  
+  # Create empty array for storing migration related data
+  # Area Specific Out Migration Ratio
+  ASOMR = array(rep(0, (final+1) * numareas * 2 * (lastage+1)), dim=c((final+1), numareas, 2, (lastage+1)))
+  # Inward migration amount
+  inward = array(rep(0, (final+1) * numareas * 2 * (lastage+1)), dim=c((final+1), numareas, 2, (lastage+1)))
+  # Outward migration amount
+  outward = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Prelimium migration
+  prelimmig = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Scaled migration
+  scaledmig = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Prelimium inward migration
+  prelimbaseinward = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Prelimium outward migration
+  prelimbaseoutward = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Cohort net migration
+  cohortnetmig = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Adjuested net migration
+  adjnetmig = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Raw scaling factor
+  scalingfactor2a = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  # Smoothed scaling factor
+  scalingfactor2b = array(rep(0, numareas * 2 * (lastage+1)), dim=c(numareas, 2, (lastage+1)))
+  
+  # Collecting Migration Input Data
+  for (i in 1:numareas){
+    
+    # Generate preliminary migration turnover by sex-age cohort based on model rates
+    for (s in 1:2){
+      # Generate preliminary migration turnover for all sex-age cohorts exclude 0-4, 85+
+      for (pc in 2:lastage){
+        prelimmig[i, s, pc] = modelASMR[s, pc] * 2.5 * (ERP[1, i, s, pc - 1] + ERP[2, i, s, pc])
+  
+      # Generate preliminary migration turnover for 0-4
+      prelimmig[i, s, 1] = modelASMR[s, 1] * 2.5 * ERP[2, i, s, 1]
+      
+      # Generate preliminary migration turnover for 85+
+      prelimmig[i, s, lastage+1] = modelASMR[s, lastage+1] * 2.5 * (ERP[1, i, s, lastage] + ERP[1, i, s, lastage+1] + ERP[2, i, s, lastage+1])}}
+
+    # Generate total preliminarymigration turnover value
+    totprelimmig = 0
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        totprelimmig = totprelimmig + prelimmig[i, s, pc]}}
+
+    # Collecting scaled preliminary migration by sex-age cohort to migration turnover 
+    # as calculated by the crude migration turnover rate; and then divide by 2 to give the initial inward and outward migration
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        scaledmig[i, s, pc] = prelimmig[i, s, pc] * (0.5 * totmig[i]) / totprelimmig}}
+
+    # Calculate residual net migration for base period in each area i
+    basenetmig = TotPop[2, i] - TotPop[1, i] + temptotdeaths[i] - temptotbirths[i]
+
+    # Calculate the scaling factor to estimate separate inward and outward migration totals which are consistent with residual net migration
+    scalingfactor1 = (basenetmig + (basenetmig ^ 2 + (4 * 0.5 * totmig[i] * 0.5 * totmig[i])) ^ 0.5) / (2 * 0.5 * totmig[i])
+
+    # Calculate preliminary inward and outward migration by sex-age cohort (Different with the Original Value in 'Account')
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        prelimbaseinward[i, s, pc] = scaledmig[i, s, pc] * scalingfactor1
+        prelimbaseoutward[i, s, pc] = scaledmig[i, s, pc] / scalingfactor1}}
+
+    # Calculate cohort-specific residual net migration (for adjustment usage)
+    for (s in 1:2){
+      # Generate cohort-specific residual net migration for all sex-age cohorts exclude 0-4, 85+
+      for (pc in 2:lastage){
+        cohortnetmig[i, s, pc] = ERP[2, i, s, pc] - ERP[1, i, s, pc - 1] + tempdeaths[i, s, pc]}
+
+      # Generate cohort-specific residual net migration for 0-4
+      cohortnetmig[i, s, 1] = ERP[2, i, s, 1] - tempbirthssex[i, s] + tempdeaths[i, s, 1]
+      
+      # Generate cohort-specific residual net migration for 85+
+      cohortnetmig[i, s, lastage + 1] = ERP[2, i, s, lastage + 1] - (ERP[1, i, s, lastage] + ERP[1, i, s, lastage + 1]) + tempdeaths[i, s, lastage + 1]}
+
+    # Adjusted cohort-specific net migration with averaged over sex for selected ages
+    for (s in 1:2){
+      for (pc in 1:14){
+        adjnetmig[i, s, pc] = 0.5 * (cohortnetmig[i, 1, pc] + cohortnetmig[i, 2, pc])}
+      for (pc in 15:(lastage + 1)){
+        adjnetmig[i, s, pc] = cohortnetmig[i, s, pc]}}
+
+    # Calculate scaling factors to adjust directional migration (Raw & Smoothed)
+    # (a) Raw Scaling factor
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        if (prelimbaseinward[i, s, pc] > 0){
+          adjmig = adjnetmig[i, s, pc]
+          preinward = prelimbaseinward[i, s, pc]
+          preoutward = prelimbaseoutward[i, s, pc]
+          scalingfactor2a[i, s, pc] = (adjmig + (adjmig ^ 2 + (4 * preinward * preoutward)) ^ 0.5) / (2 * preinward)}
+      else{
+        scalingfactor2a[i, s, pc] = 1}}}
+
+    # (b) Smoothed Scaling factor
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        if (pc < 11){
+          scalingfactor2b[i, s, pc] = scalingfactor2a[i, s, pc]}
+        else if (pc == (lastage + 1)){
+          scalingfactor2b[i, s, pc] = 1 / 2 * (scalingfactor2a[i, s, pc - 1] + scalingfactor2a[i, s, pc])}
+        else{
+          scalingfactor2b[i, s, pc] = 1 / 3 * (scalingfactor2a[i, s, pc - 1] + scalingfactor2a[i, s, pc] + scalingfactor2a[i, s, pc + 1])}
+
+        # Further guarantee of no too extreme scaling factor value
+        if (scalingfactor2b[i, s, pc] > 10){
+          scalingfactor2b[i, s, pc] = 10}
+        else if(scalingfactor2b[i, s, pc] < 0.1){
+          scalingfactor2b[i, s, pc] = 0.1}}}
+
+        # Adjust inward and outward migration with smoothed scaling factor
+        for (s in 1:2){
+          for (pc in 1:(lastage + 1)){
+            inward[1, i, s, pc] = prelimbaseinward[i, s, pc] * scalingfactor2b[i, s, pc]
+            outward[i, s, pc] = prelimbaseoutward[i, s, pc] / scalingfactor2b[i, s, pc]}}
+
+        # Smoothing inward migration age profiles at selected age groups
+        intemp = array(rep(0, 2 * (lastage+1)), dim=c(2, (lastage+1)))
+        for (s in 1:2){
+          for (pc in 1:(lastage + 1)){
+            intemp[s, pc] = inward[1, i, s, pc]}}
+        for (s in 1:2){
+          for (pc in 1:(lastage - 1)){
+            inward[1, i, s, pc] = intemp[s, pc]}
+          for (pc in lastage:(lastage + 1)){
+            inward[1, i, s, pc] = 1 / 2 * (intemp[1, pc] + intemp[1, pc])}}
+
+        # Calculate ASOMR (Area Specific Out Migration Rate)
+        for (s in 1:2){
+          # Record ASOMR input for all sex-age cohort exclude 0-4 & 85+
+          for (pc in 1:(lastage-1)){
+            if (ERP[1, i, s, pc] + ERP[2, i, s, pc+1] > 0){
+              ASOMR[1, i, s, pc+1] = outward[i, s, pc+1] / (2.5 * (ERP[1, i, s, pc] + ERP[2, i, s, pc+1]))}
+            else{
+              ASOMR[1, i, s, pc+1] = 0
+              print("Warning: Base period out-migration rate canoot be calculated due to zero population")
+              print("Aera = ", Areaname[i], " & Sex = ", sexlabel[s], " & Period-Cohort = ", pclabel[pc+1])}}
+
+          # Record ASOMR input for sex-age cohort 0-4
+          if (ERP[2, i, s, 1] > 0){
+            ASOMR[1, i, s, 1] = outward[i, s, 1] / (2.5 * ERP[2, i, s, 1])}
+          else{
+            ASOMR[1, i, s, 1] = 0
+            print("Warning: Base period out-migration rate canoot be calculated due to zero population")
+            print("Aera = ", Areaname[i], " & Sex = ", sexlabel[s], " & Period-Cohort = ", pclabel[1])}
+
+          # Record ASOMR inpurt for sex age ohort 85+
+          if (ERP[1, i, s, lastage] + ERP[1, i, s, lastage+1] > 0){
+            ASOMR[1, i, s, lastage+1] = outward[i, s, lastage+1] / (2.5 * (ERP[1, i, s, lastage] + ERP[1, i, s, lastage+1] + ERP[2, i, s, lastage+1]))}
+          else{
+            ASOMR[1, i, s, lastage+1] = 0}}
+
+        # Smoothing ASOMR at selected age groups
+        outtemp = array(rep(0, 2 * (lastage+1)), dim=c(2, (lastage+1)))
+        for (s in 1:2){
+          for (pc in 1:(lastage + 1)){
+            outtemp[s, pc] = ASOMR[1, i, s, pc]}}
+        # Start smoothing
+        for (s in 1:2){
+          # When for the first 11 groups, keep ASOMR unchanged
+          for (pc in 1:11){
+            ASOMR[1, i, s, pc] = outtemp[s, pc]}
+
+          # Smooth the rest of the elder age groups ASOMR
+          for (pc in 12:(lastage + 1)){
+            ASOMR[1, i, s, pc] = 1 / 2 * (outtemp[1, pc] + outtemp[2, pc])}}
+
+        # Set default ASOMR and Inward migration projection on the future 3 year intervals (20-25, 25-30, 40-35)
+        for (y in 2:(final + 1)){
+          for (s in 1:2){
+            for (pc in 1:(lastage + 1)){
+              ASOMR[y, i, s, pc] = ASOMR[1, i, s, pc]
+              inward[y, i, s, pc] = inward[1, i, s, pc]}}}
+
+        # Check that ASOMRs + ASDR do not exceed 0.4 & Adjust ASOMRs if necessary
+        # Helps to avoid negative population if there is no inward migration because pop-at-risk = 2.5 * (Pop0 + Pop1)
+        for (y in 1:(final + 1)){
+          for (s in 1:2){
+            for (pc in 1:(lastage + 1)){
+              if (ASOMR[y, i, s, pc] + ASDR[y, i, s, pc] > 0.5){
+                temprate = ASOMR[y, i, s, pc]
+                ASOMR[y, i, s, pc] = 0.4 - ASDR[y, i, s, pc]
+                print("Warning: Excessive outward migration rate reducing")
+                print("Avoid having outward migration rate + age-specific death rate from exceeding 0.4")
+                print("Old rate = ", temprate, " & New rate = ", ASOMR[y, i, s, pc], " & Area = ", Areaname[i], " & Sex = ",
+                      sexlabel[s], " & Period-Cohort = ", pclabel[pc], " & Interval = ", intervallabel[y])}}}}}
+
+  # Return migration input data
+  return (list("ASOMR" = ASOMR, "inward" = inward, "outward" = outward, "prelimmig" = prelimmig, "scaledmig" = scaledmig,
+               "prelimbaseinward" = prelimbaseinward, "prelimbaseoutward" = prelimbaseoutward, "cohortnetmig" = cohortnetmig,
+               "adjnetmig" = adjnetmig, "scalingfactor2a" = scalingfactor2a, "scalingfactor2b" = scalingfactor2b))
+}

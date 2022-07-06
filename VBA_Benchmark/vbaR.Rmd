@@ -68,7 +68,7 @@ yearlabel = labels_other_key[1:(final + 2), 1]
 intervallabel = labels_other_key[1:(final + 1), 1]
 
 # Estimated & Projected Small Area Total Population (Aggregated)
-TotPop = t(SmallAreaTotals[, 5:(5+final)])
+TotPop = t(SmallAreaTotals[, 4:5])
 
 # ERP (Estimated Resident Population) by age & sex (before and at jumpoff year)
 ERP = readERP(2, numareas, numages, AgeSexERPs, FALSE)
@@ -93,14 +93,69 @@ totmig = migTurnover[, 4]
 modelASMR = t(migRate[, 2:3])
 ```
 
-### Some Checks
+### Some Checks (Need further confirmation)
 ```{r}
+# TFRs > 0
+for (i in 1:(final + 1)){
+  for (a in 1:numareas){
+      if (TFR[i, a] < 0.1){
+          print("Error: Year = ", yearlabel[i], " & Area = ", Areaname[a])
+          break}}}
 
+# eOs > 0
+for (i in 1:(final + 1)){
+  for (a in 1:numareas){
+    for (q in 1:2){
+        if (eO[i, a, q] < 0.1){
+          print("Error: Year = ", yearlabel[i], " & Area = ", Areaname[a], " & Sex = ", sexlabel[q])
+          break}}}}
+
+# Check Migration Turnover > 0
+for (i in 1:numareas){
+  if (totmig[i] < 0.1){
+    print("Error: Area =", Areaname[i])
+    break}}
+    
+# Check Small Area Population Total > 0
+for (i in 1:2){
+  for (a in 1:numareas){
+    if (TotPop[i, a] < 0.1){
+      print("Error Year =", yearlabel[i], " & Area = ", Areaname[a])
+      break}}}
 ```
 
 ### Calculate Input Data
 ```{r}
+# Create input data for ASFR (Area specific Fertility Rate)
+ASFR = inputASFR(final, numareas, age_ASFR, prelimASFR, modelASFR, TFR, modelTFR)
 
+# Estimate base period birth by sex for the population 'Accounts'
+tempbirth = inputbirth(numareas, age_ASFR, ASFR, ERP, SRB)
+tempbirthssex = tempbirth$tempsex
+temptotbirths = tempbirth$temp
+
+# Calculate base period projected age-specific death rate (used in estimating death account)
+ASDR = inputASDR(final, numareas, lastage, nLxMS, eO, MS_TO, MS_nLx)
+
+# Calculate estimated death for age-sex cohorts and total population accounts
+tempdeath = inputdeath(numareas, lastage, ASDR, ERP)
+tempdeaths = tempdeath$deaths
+temptotdeaths = tempdeath$totdeaths
+
+# Calculate migration input data
+migData = inputMigration(final, numareas, lastage, modelASMR, ERP, totmig, TotPop, temptotdeaths, temptotbirths,
+                         tempdeaths, tempbirthssex, ASDR, Areaname, sexlabel, pclabel, intervallabel)
+ASOMR = migData$ASOMR
+inward = migData$inward
+outward = migData$outward
+prelimmig = migData$prelimmig
+scaledmig = migData$scaledmig
+prelimbaseinward = migData$prelimbaseinward
+prelimbaseoutward = migData$prelimbaseoutward
+cohortnetmig = migData$cohortnetmig
+adjnetmig = migData$adjnetmig
+scalingfactor2a = migData$scalingfactor2a
+scalingfactor2b = migData$scalingfactor2b
 ```
 
 ### Write Input Data to Worksheet
