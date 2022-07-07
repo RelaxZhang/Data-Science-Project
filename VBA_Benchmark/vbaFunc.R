@@ -438,3 +438,119 @@ inputMigration <- function(final, numareas, lastage, modelASMR, ERP, totmig, Tot
                "prelimbaseinward" = prelimbaseinward, "prelimbaseoutward" = prelimbaseoutward, "cohortnetmig" = cohortnetmig,
                "adjnetmig" = adjnetmig, "scalingfactor2a" = scalingfactor2a, "scalingfactor2b" = scalingfactor2b))
 }
+
+################################################################################
+# Function for read in National Projection Data
+readNatP <- function(final, numages, TotPopulation){
+  
+  # Create empty array for storing national total population
+  NatP = array(rep(0, (final + 1) * 2 * numages), dim = c((final + 1), 2, numages))
+  
+  # Load in Total Population Data
+  row = 0
+  for (s in 1:2){
+    for (a in 1:numages){
+      row = row + 1
+      col = 3
+      for (y in 1:(final + 1)){
+        col = col + 1
+        NatP[y, s, a] = TotPopulation[row, col]}}}
+  
+  # Return National Projection data
+  return (NatP)
+}
+
+# Function for reading in national projected deaths, new migration data
+readDN <- function(final, lastage, numages, dataset){
+  
+  # Create empty array for storing national population data (death / net migration)
+  Natpc = array(rep(0, final * 2 * numages), dim = c(final, 2, numages))
+  
+  # Load in National Population Data
+  row = 0
+  for (s in 1:2){
+    for (pc in 1:(lastage + 1)){
+      row = row + 1
+      col = 2
+      for (y in 1:final){
+        col = col + 1
+        Natpc[y, s, pc] = dataset[row, col]}}}
+  
+  # Return National Projection Data (in Period-cohort)
+  return (Natpc)
+}
+
+# Function for writing headings / row name in CheckMig, CheckDeaths, Log Sheets
+writeNoteCL <- function(lastage, pclabel, labels_other_key, final, Areaname, sexlabel){
+  
+  # Create empty array for creating framework of check sheets
+  wb_wt_Log = array(rep(NaN, final*final), dim = c(final, final))
+  wb_wt_CheckMig = array(rep(NaN, (final*(lastage + 1)*2) * (numareas * 2 + 3 + 1)),
+                         dim = c(final*(lastage+1)*2, numareas * 2 + 3 + 1))
+  wb_wt_CheckDeaths = array(rep(NaN, (final*(lastage + 1)*2) * (numareas + 3 + 1)),
+                            dim = c(final*(lastage+1)*2, numareas + 3 + 1))
+  
+  # Load in Log Headings
+  index = 1
+  for (i in 1:final){
+    index = index + 1
+    wb_wt_Log[i] = labels_other_key[index, 2]}
+  
+  index = 0
+  for (f in 1:final){
+    for (s in 1:2){
+      for (a in 1:(lastage + 1)){
+        index = index + 1
+        wb_wt_CheckMig[index, 1] = labels_other_key[f + 1, 2]
+        wb_wt_CheckMig[index, 2] = sexlabel[s]
+        wb_wt_CheckMig[index, 3] = pclabel[a]
+        
+        wb_wt_CheckDeaths[index, 1] = labels_other_key[f + 1, 2]
+        wb_wt_CheckDeaths[index, 2] = sexlabel[s]
+        wb_wt_CheckDeaths[index, 3] = pclabel[a]}}}
+  
+  # Construct Dataframe
+  wb_wt_Log = data.frame(wb_wt_Log)
+  wb_wt_CheckMig = data.frame(wb_wt_CheckMig)
+  wb_wt_CheckDeaths = data.frame(wb_wt_CheckDeaths)
+  colnames(wb_wt_Log) = c("Projection interval", "Population-at-risk iterations", "Mig adjustment iterations")
+  colnames(wb_wt_CheckMig) = c("Year-Cohort", "Sex", "Period-Cohort", Areaname, Areaname, "National net mig")
+  colnames(wb_wt_CheckDeaths) = c("Year-Cohort", "Sex", "Period-Cohort", Areaname, "National deaths")
+  
+  # Return dataframe
+  return (list("Log" = wb_wt_Log, "Mig" = wb_wt_CheckMig, "Deaths" = wb_wt_CheckDeaths))
+}
+
+# Function for setting initial value of jump-off year population
+readIniPop <- function(final, numareas, numages, ERP){
+
+  # Create empty array for storing population data
+  Population = array(rep(0, (final + 1) * numareas * 2 * numages),
+                     dim = c((final + 1), numareas, 2, numages))
+
+  # record initial (jump-off year) population from ERP dataset
+  for (i in 1:numareas){
+    for (s in 1:2){
+      for (pc in 1:numages){
+        Population[1, i, s, pc] = ERP[1, i, s, pc]}}}
+
+  # Return initial population dataset (the rest 3 levels are used for storing the projection)
+  return (Population)
+}
+
+# Function for recording the total population in jump-off year in each area
+readIniTPop <- function(final, numareas, numages, Population){
+  
+  # Create empty array for collecting total population
+  totPopulation = array(rep(0, (final + 1) * numareas), dim = c((final + 1), numareas))
+  
+  # Record jump-off year total population in each area
+  for (i in 1:numareas){
+    totPopulation[1, i] = 0
+    for (s in 1:2){
+      for (a in 1:numages){
+        totPopulation[1, i] = totPopulation[1, i] + Population[1, i, s, a]}}}
+  
+  # Return total population of jump-off year (the rest 3 levels are used for storing the projection)
+  return (totPopulation)
+}

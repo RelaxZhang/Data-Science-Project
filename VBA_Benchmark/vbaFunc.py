@@ -844,7 +844,7 @@ def readIniTPop(final, numareas, numages, Population):
             for a in range(numages):
                 totPopulation[0, i] += Population[0, i, s, a]
     
-    # Return total polulation of jump-off year (the rest 3 levels are used for storing the projection)
+    # Return total population of jump-off year (the rest 3 levels are used for storing the projection)
     return totPopulation
 
 '''Function for generating scaled inward and outward migration projection'''

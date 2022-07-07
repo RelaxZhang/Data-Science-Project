@@ -43,6 +43,9 @@ SRB = otherFertility[1, 3]              # Sex Ratio at Birth (Male : Female)
 modelTFR  = otherFertility[1, 2]        # Model TFR Parameter
 nLxMS = length(Mortality) - 2           # nLx mortality surface groups
 age_ASFR = length(otherFertility[, 1])  # Age groups amount in ASFRs
+smallnumber = 0.0001                    # Smoothed Number
+maxqiter = labels_other_key[1, 4]       # Max number of population-at-risk loop iterations
+maxziter = labels_other_key[1, 5]       # Max number of migration adjustment iterations
 ```
 
 # xTRF
@@ -342,7 +345,68 @@ write.csv(smallareainputs_data, file = "./Output_CSV/SmallAreaInputs.csv", row.n
 
 # SyntheticProjectionModel
 ## Start Generating Projection Data
-### Define Variables
+### Load in Required Input Data for Generating Projection Output
 ```{r}
+# Read in Estimated & Projected Small Area Total Population (Aggregated)
+TotPop = t(SmallAreaTotals[, 5:(5+final)])
+
+# Read in small area ERP (Estimated Resident Population) by age & sex (at jumpoff year)
+ERP = readERP(1, numareas, numages, AgeSexERPs, TRUE)
+
+# Read in National population estimate & projections by age & sex
+NatP = readNatP(final, numages, TotPopulation)
+
+# Read in ASDR, ASOMR, Inward Migration, ASFR data for projection
+ASDR = ASDR[2:(1+final), 1:numareas, 1:2, 1:numages]
+ASOMR = ASOMR[2:(1+final), 1:numareas, 1:2, 1:numages]
+inward = inward[2:(1+final), 1:numareas, 1:2, 1:numages]
+ASFR = ASFR[2:(1+final), 1:numareas, 1:age_ASFR]
+
+# Read in National projected births, deaths, net migration data
+NatB = t(totBirth[1:2, 2:4])
+NatDpc = readDN(final, lastage, numages, totDeath)
+NatNpc = readDN(final, lastage, numages, totNetMig)
+```
+
+### Some Checks & Headings Writing
+```{r}
+# pop total > 0
+for (y in 1:final){
+  for (i in 1:numareas){
+    if (TotPop[y, i] < 0.1){
+      print("Error: Year = ", yearlabel[y + 2], " & Area = ", Areaname[i])
+      break}}}
+
+# Check small area population totals match national population total
+for (y in 1:(final + 1)){
+  checktot1 = 0
+  for (i in 1:numareas){
+    checktot1 = checktot1 + TotPop[y, i]}
+  checktot2 = 0
+  for (s in 1:2){
+    for (a in 1:(lastage + 1)){
+      checktot2 = checktot2 + NatP[y, s, a]}}
+    
+  if (abs(checktot1 - checktot2) > smallnumber){
+    print("Error: Year = ", yearlabel[y + 1], "Sum of pop total = ", checktot1, ", Sum of national projections = ", checktot2)
+    break}}
+
+# Create Dataframe for CheckMig, CheckDeaths, Log
+check_Sheet = writeNoteCL(lastage, pclabel, labels_other_key, final, Areaname, sexlabel)
+wb_wt_Log = check_Sheet$Log
+wb_wt_CheckMig = check_Sheet$Mig
+wb_wt_CheckDeaths = check_Sheet$Deaths
+```
+
+### Start Projection
+```{r}
+# Set initial value of jump-off year population in age-sex cohort
+Population = readIniPop(final, numareas, numages, ERP)
+
+# Record total jump-off population into dataset for further projection usage
+totPopulation = readIniTPop(final, numareas, numages, Population)
+
+# Main Projection Section Starts
+# Start the Projection Interval Loop (record final = 3 projection years)
 
 ```
