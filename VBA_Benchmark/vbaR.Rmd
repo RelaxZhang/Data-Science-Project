@@ -255,92 +255,81 @@ SmallAreaInputs_index = rep(0, numareas * numages)
 SmallAreaInputs_code = rep(0, numareas * numages)
 SmallAreaInputs_name = rep(0, numareas * numages)
 SmallAreaInputs_pc = rep(0, numareas * numages)
+SmallAreaInputs = cbind(SmallAreaInputs_index, SmallAreaInputs_code,
+                        SmallAreaInputs_name, SmallAreaInputs_pc)
 
-SmallAreaInputs_FASDR20 = rep(0, numareas * numages)
-SmallAreaInputs_FASDR25 = rep(0, numareas * numages)
-SmallAreaInputs_FASDR30 = rep(0, numareas * numages)
-SmallAreaInputs_MASDR20 = rep(0, numareas * numages)
-SmallAreaInputs_MASDR25 = rep(0, numareas * numages)
-SmallAreaInputs_MASDR30 = rep(0, numareas * numages)
-
-SmallAreaInputs_FASOMR20 = rep(0, numareas * numages)
-SmallAreaInputs_FASOMR25 = rep(0, numareas * numages)
-SmallAreaInputs_FASOMR30 = rep(0, numareas * numages)
-SmallAreaInputs_MASOMR20 = rep(0, numareas * numages)
-SmallAreaInputs_MASOMR25 = rep(0, numareas * numages)
-SmallAreaInputs_MASOMR30 = rep(0, numareas * numages)
-
-SmallAreaInputs_Fin20 = rep(0, numareas * numages)
-SmallAreaInputs_Fin25 = rep(0, numareas * numages)
-SmallAreaInputs_Fin30 = rep(0, numareas * numages)
-SmallAreaInputs_Min20 = rep(0, numareas * numages)
-SmallAreaInputs_Min25 = rep(0, numareas * numages)
-SmallAreaInputs_Min30 = rep(0, numareas * numages)
-
-SmallAreaInputs_ASFR_Age = rep(NaN, numareas * numages)
-SmallAreaInputs_ASFR20 = rep(NaN, numareas * numages)
-SmallAreaInputs_ASFR25 = rep(NaN, numareas * numages)
-SmallAreaInputs_ASFR30 = rep(NaN, numareas * numages)
+# Create Dataframe
+for (info in 1:3){
+  for (i in 1:final){
+    for (s in 1:2){
+      SmallAreaInputs = cbind(SmallAreaInputs, rep(0, numareas * numages))}}}
+for (ASFR_col in 1:(final+1)){
+  SmallAreaInputs = cbind(rep(NaN, numareas * numages))}
+wb_wt_SmallAreaInputs = data.frame(SmallAreaInputs)
 
 index = 0
 for (i in 1:numareas){
   for (pc in 1:(lastage + 1)){
     index = index + 1
     
-    SmallAreaInputs_index[index] = i
-    SmallAreaInputs_code[index] = Areacode[i]
-    SmallAreaInputs_name[index] = Areaname[i]
-    SmallAreaInputs_pc[index] = pclabel[pc]
+    wb_wt_SmallAreaInputs[index, 1] = i
+    wb_wt_SmallAreaInputs[index, 2] = Areacode[i]
+    wb_wt_SmallAreaInputs[index, 3] = Areaname[i]
+    wb_wt_SmallAreaInputs[index, 4] = pclabel[pc]
     
-    SmallAreaInputs_FASDR20[index] = ASDR[2, i, 1, pc]
-    SmallAreaInputs_FASDR25[index] = ASDR[3, i, 1, pc]
-    SmallAreaInputs_FASDR30[index] = ASDR[4, i, 1, pc]
-    SmallAreaInputs_MASDR20[index] = ASDR[2, i, 2, pc]
-    SmallAreaInputs_MASDR25[index] = ASDR[3, i, 2, pc]
-    SmallAreaInputs_MASDR30[index] = ASDR[4, i, 2, pc]
+    for (s in 1:2){
+      for (year in 1:final){
+        if (s == 1){
+          wb_wt_SmallAreaInputs[index, 4 + year] = ASDR[year + 1, i, 1, pc]}
+        else {
+          wb_wt_SmallAreaInputs[index, 4 + final + year] = ASDR[year + 1, i, 2, pc]}}}
     
-    SmallAreaInputs_FASOMR20[index] = ASOMR[2, i, 1, pc]
-    SmallAreaInputs_FASOMR25[index] = ASOMR[3, i, 1, pc]
-    SmallAreaInputs_FASOMR30[index] = ASOMR[4, i, 1, pc]
-    SmallAreaInputs_MASOMR20[index] = ASOMR[2, i, 2, pc]
-    SmallAreaInputs_MASOMR25[index] = ASOMR[3, i, 2, pc]
-    SmallAreaInputs_MASOMR30[index] = ASOMR[4, i, 2, pc]
+    for (s in 1:2){
+      for (year in 1:final){
+        if (s == 1){
+          wb_wt_SmallAreaInputs[index, 4 + 2 * final + year] = ASOMR[year + 1, i, 1, pc]}
+        else {
+          wb_wt_SmallAreaInputs[index, 4 + 3 * final + year] = ASOMR[year + 1, i, 2, pc]}}}
     
-    SmallAreaInputs_Fin20[index] = inward[2, i, 1, pc]
-    SmallAreaInputs_Fin25[index] = inward[3, i, 1, pc]
-    SmallAreaInputs_Fin30[index] = inward[4, i, 1, pc]
-    SmallAreaInputs_Min20[index] = inward[2, i, 2, pc]
-    SmallAreaInputs_Min25[index] = inward[3, i, 2, pc]
-    SmallAreaInputs_Min30[index] = inward[4, i, 2, pc]
+    for (s in 1:2){
+      for (year in 1:final){
+        if (s == 1){
+          wb_wt_SmallAreaInputs[index, 4 + 4 * final + year] = inward[year + 1, i, 1, pc]}
+        else {
+          wb_wt_SmallAreaInputs[index, 4 + 5 * final + year] = inward[year + 1, i, 2, pc]}}}
     
     if (pc > 4 & pc < 12){
-      SmallAreaInputs_ASFR_Age[index] = agelabel[pc - 1]
-      SmallAreaInputs_ASFR20[index] = ASFR[2, i, pc - 4]
-      SmallAreaInputs_ASFR25[index] = ASFR[3, i, pc - 4]
-      SmallAreaInputs_ASFR30[index] = ASFR[4, i, pc - 4]}}}
+      wb_wt_SmallAreaInputs[index, 4 + 6 * final + 1] = agelabel[pc - 1]
+      for (year in 1:final){
+        wb_wt_SmallAreaInputs[index, 4 + 6 * final + 1 + year] = ASFR[year + 1, i, pc - 4]}}}}
 
-smallareainputs_data = data.frame(SmallAreaInputs_index, SmallAreaInputs_code, SmallAreaInputs_name,
-                                  SmallAreaInputs_pc, SmallAreaInputs_FASDR20, SmallAreaInputs_FASDR25,
-                                  SmallAreaInputs_FASDR30, SmallAreaInputs_MASDR20, SmallAreaInputs_MASDR25,
-                                  SmallAreaInputs_MASDR30, SmallAreaInputs_FASOMR20, SmallAreaInputs_FASOMR25,
-                                  SmallAreaInputs_FASOMR30, SmallAreaInputs_MASOMR20, SmallAreaInputs_MASOMR25,
-                                  SmallAreaInputs_MASOMR30, SmallAreaInputs_Fin20, SmallAreaInputs_Fin25, 
-                                  SmallAreaInputs_Fin30, SmallAreaInputs_Min20, SmallAreaInputs_Min25,
-                                  SmallAreaInputs_Min30, SmallAreaInputs_ASFR_Age, SmallAreaInputs_ASFR20,
-                                  SmallAreaInputs_ASFR25, SmallAreaInputs_ASFR30)
+# Set column names
+SAI_names = c()
+for (s in 1:2){
+  for (i in 1:final){
+    if (s == 1){
+      SAI_names = c(SAI_names, paste("F_ASDRs", labels_other_key[i+1, 2]))}
+    else{
+      SAI_names = c(SAI_names, paste("M_ASDRs", labels_other_key[i+1, 2]))}}}
+for (s in 1:2){
+  for (i in 1:final){
+    if (s == 1){
+      SAI_names = c(SAI_names, paste("F_ASOMRs", labels_other_key[i+1, 2]))}
+    else{
+      SAI_names = c(SAI_names, paste("M_ASOMRs", labels_other_key[i+1, 2]))}}}
+for (s in 1:2){
+  for (i in 1:final){
+    if (s == 1){
+      SAI_names = c(SAI_names, paste("F_inward", labels_other_key[i+1, 2]))}
+    else{
+      SAI_names = c(SAI_names, paste("M_inward", labels_other_key[i+1, 2]))}}}
+SAI_names = c(SAI_names, "Age-Cohort")
+for (i in 1:final){
+  SAI_names = c(SAI_names, paste("ASFRs", labels_other_key[i+1, 2]))}
 
-colnames(smallareainputs_data) <- c("Index", "Code", "Area", "Period-Cohort", paste("F_ASDRs ", labels_other_key[2, 2]),
-                                    paste("F_ASDRs ", labels_other_key[3, 2]), paste("F_ASDRs ", labels_other_key[4, 2]),
-                                    paste("M_ASDRs ", labels_other_key[2, 2]), paste("M_ASDRs ", labels_other_key[3, 2]),
-                                    paste("M_ASDRs ", labels_other_key[4, 2]), paste("F_ASOMRs ", labels_other_key[2, 2]),
-                                    paste("F_ASOMRs ", labels_other_key[3, 2]), paste("F_ASOMRs ", labels_other_key[4, 2]),
-                                    paste("M_ASOMRs ", labels_other_key[2, 2]), paste("M_ASOMRs ", labels_other_key[3, 2]),
-                                    paste("M_ASOMRs ", labels_other_key[4, 2]), paste("F_inward ", labels_other_key[2, 2]),
-                                    paste("F_inward ", labels_other_key[3, 2]), paste("F_inward ", labels_other_key[4, 2]),
-                                    paste("M_inward ", labels_other_key[2, 2]), paste("M_inward ", labels_other_key[3, 2]),
-                                    paste("M_inward ", labels_other_key[4, 2]), "Age-Cohort", paste("ASFRs ", labels_other_key[2, 2]),
-                                    paste("ASFRs ", labels_other_key[3, 2]), paste("ASFRs ", labels_other_key[4, 2]))
-write.csv(smallareainputs_data, file = "./Output_CSV/SmallAreaInputs.csv", row.names = FALSE)
+# Save SmallAreaInputs as CSV
+colnames(wb_wt_SmallAreaInputs) <- c("Index", "Code", "Area", "Period-Cohort", SAI_names)
+write.csv(wb_wt_SmallAreaInputs, file = "./Output_CSV/SmallAreaInputs.csv", row.names = FALSE)
 ```
 
 # SyntheticProjectionModel
@@ -398,7 +387,7 @@ wb_wt_CheckMig = check_Sheet$Mig
 wb_wt_CheckDeaths = check_Sheet$Deaths
 ```
 
-### Start Projection
+### Projection
 ```{r}
 # Set initial value of jump-off year population in age-sex cohort
 Population = readIniPop(final, numareas, numages, ERP)
@@ -408,5 +397,323 @@ totPopulation = readIniTPop(final, numareas, numages, Population)
 
 # Main Projection Section Starts
 # Start the Projection Interval Loop (record final = 3 projection years)
+Pop0 = array(rep(0, final * numareas * 2 * (lastage + 1)), dim = c(final, numareas, 2, (lastage + 1)))
+Pop1 = array(rep(0, final * numareas * 2 * (lastage + 1)), dim = c(final, numareas, 2, (lastage + 1)))
+Btot = array(rep(0, final * numareas), dim = c(final, numareas))                                       # Total Birth in sex cohort
+Dpc = array(rep(0, final * numareas * 2 * (lastage + 1)), dim = c(final, numareas, 2, (lastage + 1)))  # Death in age-sex cohort
+Dtot = array(rep(0, final * numareas), dim = c(final, numareas))                                       # Total Death in sex cohort
+IMpc = array(rep(0, final * numareas * 2 * (lastage + 1)), dim = c(final, numareas, 2, (lastage + 1))) # Total Inward Migration in sex cohort
+OMpc = array(rep(0, final * numareas * 2 * (lastage + 1)), dim = c(final, numareas, 2, (lastage + 1))) # Total Outward Migration in sex cohort
+totN = array(rep(0, final * numareas), dim = c(final, numareas))
+previousPop1 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+totINMIG = array(rep(0, final * numareas), dim = c(final, numareas))
+totOUTMIG = array(rep(0, final * numareas), dim = c(final, numareas))
+```
 
+### Projection Iteration
+```{r}
+for (y in 2:(final + 1)){
+  # Record for each year of projection, the initial population is the previous year's projected population
+  # This function does not record the projected pop of 0-4 group
+  for (i in 1:numareas){
+    for (s in 1:2){
+      for (pc in 2:lastage){
+        Pop0[y - 1, i, s, pc] = Population[y - 1, i, s, pc - 1]}
+       
+      # Record 85+ group population
+      Pop0[y - 1, i, s, lastage + 1] = Population[y - 1, i, s, lastage] + Population[y - 1, i, s, lastage + 1]}}
+ 
+  # Start large iteration
+  for (q in 1:maxqiter){
+     
+    # Record the number of iteration required
+    wb_wt_Log[y - 1, 2] = q
+     
+    # For the first iteration, the end-of-interval population is set (avoid a negative projected population)
+    if (q == 1){
+      for (i in 1:numareas){
+        for (s in 1:2){
+          for (pc in 1:lastage){
+            Pop1[y - 1, i, s, pc + 1] = 0}}}} # (+++ Projection Data Pop1 is written +++)
+     
+    #--------------------------------------------------------------------------
+    # Birth Projection
+    # Preliminary birth by age of mother
+    Bage = array(rep(0, numareas * age_ASFR), dim = c(numareas, age_ASFR))
+    Btottmp = rep(0, numareas)
+    for (i in 1:numareas){
+      Btottmp[i] = 0
+      for (pc in 1:7){
+        Bage[i, pc] = ASFR[y - 1, i, pc] * 2.5 * (Pop0[y - 1, i, 1, pc + 4] + Pop1[y - 1, i, 1, pc + 3])
+        Btottmp[i] = Btottmp[i] + Bage[i, pc]}}
+     
+    # Preliminary birth by sex
+    Bsextmp = array(rep(0, numareas * 2), dim = c(numareas, 2))
+    Bsextmptot =  rep(0, 2)
+    for (i in 1:numareas){
+      # Female
+      Bsextmp[i, 1] = Btottmp[i] * (100 / (100 + SRB))
+      Bsextmptot[1] = Bsextmptot[1] + Bsextmp[i, 1]
+      # Males
+      Bsextmp[i, 2] = Btottmp[i] * (SRB / (100 + SRB))
+      Bsextmptot[2] = Bsextmptot[2] + Bsextmp[i, 2]}
+    
+    # Constrain to national births by sex (+++ Projection total birth -- Btot is Written +++)
+    Bsex = array(rep(0, numareas * 2), dim = c(numareas, 2))
+    for (i in 1:numareas){
+      Btot[y - 1, i] = 0
+      for (s in 1:2){
+        Bsex[i, s] = Bsextmp[i, s] * NatB[y - 1, s] / Bsextmptot[s]
+        Btot[y - 1, i] = Btot[y - 1, i] + Bsex[i, s]}}
+    
+    # Allocate births to the initial infant population (+++ Projection Pop0 is written for filling age-group 0-4 +++)
+    for (i in 1:numareas){
+      for (s in 1:2){
+        Pop0[y - 1, i, s, 1] = Bsex[i, s]}}
+    
+    # For the first iteration, the end-of-interval group 0-4 population is set (+++ Pop1 is written fo filling group 0-4 +++)
+    if (q == 1){
+      for (i in 1:numareas){
+        for (s in 1:2){
+          Pop1[y - 1, i, s, 1] = Bsex[i, s]}}}
+    
+    #---------------------------------------------------------------------------
+    # Death Projection
+    # Preliminary deaths in age-sex groups
+    Dtmp = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        # Record age group without 0-4
+        for (pc in 2:(lastage + 1)){
+          Dtmp[i, s, pc] = ASDR[y - 1, i, s, pc] * 2.5 * (Pop0[y - 1, i, s, pc] + Pop1[y - 1, i, s, pc])}
+          # Record age group 0-4    
+        Dtmp[i, s, 1] = ASDR[y - 1, i, s, 1] * 2.5 * Pop1[y - 1, i, s, 1]}}
+    
+    # Preliminary total deaths (sum age)
+    Dtmptot = array(rep(0, 2 * (lastage + 1)), dim = c(2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          Dtmptot[s, pc] = Dtmptot[s, pc] + Dtmp[i, s, pc]}}}
+    
+    # Constrain to national deaths (+++ Dpc, Dtot are written as death projection data +++)
+    for (i in 1:numareas){
+      Dtot[y - 1 , i] = 0
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          Dpc[y - 1, i, s, pc] = Dtmp[i, s, pc] * NatDpc[y - 1, s, pc] / Dtmptot[s, pc]
+          Dtot[y - 1, i] = Dtot[y - 1, i] + Dpc[y - 1, i, s, pc]}}}
+    
+    #---------------------------------------------------------------------------
+    # Migration Projection
+    # Preliminary Migration (in & out)
+    prelimIMpc = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    prelimOMpc = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        # Record age group without 0-4
+        for (pc in 2:(lastage + 1)){
+          prelimIMpc[i, s, pc] = inward[y - 1, i, s, pc]
+          prelimOMpc[i, s, pc] = ASOMR[y - 1, i, s, pc] * 2.5 * (Pop0[y - 1, i, s, pc] + Pop1[y - 1, i, s, pc])}
+        # Record age group 0-4
+        prelimIMpc[i, s, 1] = inward[y - 1, i, s, 1]
+        prelimOMpc[i, s, 1] = ASOMR[y - 1, i, s, 1] * 2.5 * Pop1[y - 1, i, s, 1]}}
+    
+    # Calculate residual net migration required to produce total projected populations
+    requiredN = rep(0, numareas)
+    for (i in 1:numareas){
+      requiredN[i] = TotPop[y, i] - TotPop[y - 1, i] - Btot[y - 1, i] + Dtot[y - 1, i]}
+    
+    # Preparing arrays for IPF
+    NatN = array(rep(0, 2 * (lastage + 1)), dim = c(2, (lastage + 1)))
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        NatN[s, pc] = NatNpc[y - 1, s, pc]}}
+    
+    LocalPop0 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    LocalDpc = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          LocalPop0[i, s, pc] = Pop0[y - 1, i, s, pc]
+          LocalDpc[i, s, pc] = Dpc[y - 1, i, s, pc]}}}
+    
+    labelint = intervallabel[y]
+    labely = y
+    labelq = q
+    
+    # Generate IPF
+    scaledIM = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    scaledOM = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    
+    # Call the NetMigAdjustment2 function to generate IPF data (scaled Inward & Outward Migration)
+    scaledIO = NetMigAdjustment2(labely, prelimIMpc, prelimOMpc, NatN, requiredN, LocalPop0, LocalDpc, scaledIM,
+                                 scaledOM, numareas, lastage, maxziter, smallnumber, wb_wt_Log)
+    scaledIM = scaledIO$IM
+    scaledOM = scaledIO$OM
+    wb_wt_Log = scaledIO$Log
+    
+    # Allocate fitted migration to migration arrays (+++ IMpc, OMpc are written +++)
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          IMpc[y - 1, i, s, pc] = scaledIM[i, s, pc]
+          OMpc[y - 1, i, s, pc] = scaledOM[i, s, pc]}}}
+    
+    # END-OF-INTERVAL POPULATIONS
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          Pop1[y - 1, i, s, pc] = Pop0[y - 1, i, s, pc] - Dpc[y - 1, i, s, pc] + IMpc[y - 1, i, s, pc] - OMpc[y - 1, i, s, pc]}}}
+    
+    # Difference between the end-of-interval population calculated above & Those of the previous iteration are compared
+    totpop1_OK = 0
+    pop1_OK = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    discrepancy = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    if (q > 1){
+      for (i in 1:numareas){
+        for (s in 1:2){
+          for (pc in 1:(lastage + 1)){
+            discrepancy[i, s, pc] = abs(Pop1[y - 1, i, s, pc] - previousPop1[i, s, pc])
+            if (discrepancy[i, s, pc] < smallnumber){
+              pop1_OK[i, s, pc] = 0}
+            else{
+              pop1_OK[i, s, pc] = 1}
+            totpop1_OK = totpop1_OK + pop1_OK[i, s, pc]}}}}
+    
+    # Previous iteration loop value of the final population are updated
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          previousPop1[i, s, pc] = Pop1[y - 1, i, s, pc]}}}
+    
+    # Convergence Check
+    if (q > 1){
+      if (totpop1_OK == 0){
+        break}}}
+    
+  # Write out preliminary and scale net migration
+  row = 0 + (y - 2) * (2 * (lastage + 1))
+  for (s in 1:2){
+    for (pc in 1:(lastage + 1)){
+      row = row + 1
+      col = 3
+      for (i in 1:numareas){
+        col = col + 1
+        wb_wt_CheckMig[row, col] = prelimIMpc[i, s, pc] - prelimOMpc[i, s, pc]
+        wb_wt_CheckMig[row, col + numareas] = IMpc[y - 1, i, s, pc] - OMpc[y - 1, i, s, pc]}
+      col = col + 1
+      wb_wt_CheckMig[row, col + numareas] = NatNpc[y - 1, s, pc]}}
+  
+  # Write out projected deaths
+  row = 0 + (y - 2) * (2 * (lastage + 1))
+  for (s in 1:2){
+    for (pc in 1:(lastage + 1)){
+      row = row + 1
+      col = 3
+      for (i in 1:numareas){
+        col = col + 1
+        wb_wt_CheckDeaths[row, col] = Dpc[y - 1, i, s, pc]}
+      col = col + 1
+      wb_wt_CheckDeaths[row, col] = NatDpc[y - 1, s, pc]}}
+  
+  # Calculate total migration for population accounts output
+  for (i in 1:numareas){
+    totN[y - 1, i] = 0
+    totINMIG[y - 1, i] = 0
+    totOUTMIG[y - 1, i] = 0
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        totN[y - 1, i] = totN[y - 1, i] + (IMpc[y - 1, i, s, pc] - OMpc[y - 1, i, s, pc])
+        totINMIG[y - 1, i] = totINMIG[y - 1, i] + IMpc[y - 1, i, s, pc]
+        totOUTMIG[y - 1, i] = totOUTMIG[y - 1, i] + OMpc[y - 1, i, s, pc]}}}
+  
+  # Adjustment of age subscripts (+++ Population is written +++)
+  for (i in 1:numareas){
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        Population[y, i, s, pc] = Pop1[y - 1, i, s, pc]}}}
+  
+  # Total populations summed from age-sex populations (+++ totPopulation is written +++)
+  for (i in 1:numareas){
+    totPopulation[y, i] = 0
+    for (s in 1:2){
+      for (a in 1:numages){
+        totPopulation[y, i] = totPopulation[y, i] + Population[y, i, s, a]}}}
+  
+  # Check for negative populations
+  for (i in 1:numareas){
+    for (s in 1:2){
+      for (a in 1:numages){
+        if (Population[y, i, s, a] < 0){
+          print("Error: Negative population detected in one or more age groups")}}}}
+}
+
+# Write Check Data (Log, Mig, Deaths)
+write.csv(wb_wt_Log, "./Output_CSV/Log.csv", row.names = FALSE)
+write.csv(wb_wt_CheckDeaths, "./Output_CSV/CheckDeaths.csv", row.names = FALSE)
+write.csv(wb_wt_CheckMig, "./Output_CSV/CheckMig.csv", row.names = FALSE)
+```
+
+### Write Projection Data (AgeSexForecases)
+```{r}
+AgeSexForecasts_index = rep(NaN, numareas * 2 * numages)
+AgeSexForecasts_code = rep(NaN, numareas * 2 * numages)
+AgeSexForecasts_name = rep(NaN, numareas * 2 * numages)
+AgeSexForecasts_sex = rep(NaN, numareas * 2 * numages)
+AgeSexForecasts_age = rep(NaN, numareas * 2 * numages)
+
+AgeSexForecasts = cbind(AgeSexForecasts_index, AgeSexForecasts_code, AgeSexForecasts_name, AgeSexForecasts_sex, AgeSexForecasts_age)
+for (i in 1:(1 + final)){
+  AgeSexForecasts = cbind(AgeSexForecasts, rep(0, numareas * 2 * numages))}
+wb_wt_AgeSexForecasts = data.frame(AgeSexForecasts)
+
+row = 0
+for (i in 1:numareas){
+  for (s in 1:2){
+    for (a in 1:numages){
+      row = row + 1
+      wb_wt_AgeSexForecasts[row, 1] = i
+      wb_wt_AgeSexForecasts[row, 2] = Areacode[i]
+      wb_wt_AgeSexForecasts[row, 3] = Areaname[i]
+      wb_wt_AgeSexForecasts[row, 4] = sexlabel[s]
+      wb_wt_AgeSexForecasts[row, 5] = agelabel[a]
+      col = 5
+      for (y in 1:(final + 1)){
+        col = col + 1
+        wb_wt_AgeSexForecasts[row, col] = Population[y, i, s, a]}}}}
+
+colnames(wb_wt_AgeSexForecasts) <- c("No.", "Code", "Area name", "Sex", "Age group", yearlabel[2:(final+2)])
+write.csv(wb_wt_AgeSexForecasts, "./Output_CSV/AgeSexForecasts.csv", row.names = FALSE)
+```
+
+### Write Projection Data (AgeSexForecases)
+```{r}
+components_info = rep(NaN, numareas * (1 + 5))
+for (i in 1:final){
+  components_info = cbind(components_info, rep(NaN, numareas * (1 + 5)))}
+wb_wt_Components = data.frame(components_info)
+colnames(wb_wt_Components) = c("Info", labels_other_key[(1+1):(1+final), 2])
+
+row = 0
+for (i in 1:numareas){
+  row = row + 1
+  wb_wt_Components[row, 1] = paste(as.character(i), Areaname[i])
+  wb_wt_Components[row + 1, 1] = "Start-of-period population"
+  wb_wt_Components[row + 2, 1] = "Births"
+  wb_wt_Components[row + 3, 1] = "Deaths"
+  wb_wt_Components[row + 4, 1] = "Net migration"
+  wb_wt_Components[row + 5, 1] = "End-of-period population"
+  
+  col = 1
+  for (y in 2:(final+1)){
+    col = col + 1
+    wb_wt_Components[row + 1, col] = totPopulation[y - 1, i]
+    wb_wt_Components[row + 2, col] = Btot[y - 1, i]
+    wb_wt_Components[row + 3, col] = Dtot[y - 1, i]
+    wb_wt_Components[row + 4, col] = totN[y - 1, i]
+    wb_wt_Components[row + 5, col] = totPopulation[y, i]}
+  row = row + 5}
+
+write.csv(wb_wt_Components, "./Output_CSV/Components.csv", row.names = FALSE)
 ```

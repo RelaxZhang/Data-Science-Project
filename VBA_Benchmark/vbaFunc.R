@@ -554,3 +554,131 @@ readIniTPop <- function(final, numareas, numages, Population){
   # Return total population of jump-off year (the rest 3 levels are used for storing the projection)
   return (totPopulation)
 }
+
+# Function for generating scaled inward and outward migration projection'''
+NetMigAdjustment2 <- function(labely, prelimIMpc, prelimOMpc, NatN, requiredN, LocalPop0, LocalDpc,
+                              scaledIM, scaledOM, numareas, lastage, maxziter, smallnumber, wb_wt_Log){
+  totN1 = 0
+  for (i in 1:numareas){
+    totN1 = totN1 + requiredN[i]}
+
+  totN2 = 0
+  for (s in 1:2){
+    for (pc in 1:(lastage + 1)){
+      totN2 = totN2 + NatN[s, pc]}}
+
+  IM1 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+  OM1 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+  for (i in 1:numareas){
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        IM1[i, s, pc] = prelimIMpc[i, s, pc]
+        OM1[i, s, pc] = prelimOMpc[i, s, pc]}}}
+
+  for (z in 1:maxziter){
+    
+    # Record the number of iterations required
+    wb_wt_Log[labely - 1, 3] = z
+  
+    # Calculate inward & outward migration by sex and period-cohort summed over 
+    totIM1 = array(rep(0, 2 * (lastage + 1)), dim = c(2, (lastage + 1)))
+    totOM1 = array(rep(0, 2 * (lastage + 1)), dim = c(2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          totIM1[s, pc] = totIM1[s, pc] + IM1[i, s, pc]
+          totOM1[s, pc] = totOM1[s, pc] + OM1[i, s, pc]}}}
+  
+    # Calculate the scaling factors
+    sf = array(rep(0, 2 * (lastage + 1)), dim = c(2, (lastage + 1)))
+    for (s in 1:2){
+      for (pc in 1:(lastage + 1)){
+        if (totIM1[s, pc] > 0){
+          sf[s, pc] = (NatN[s, pc] + (((NatN[s, pc] ^ 2) + (4 * totIM1[s, pc] * totOM1[s, pc])) ^ 0.5)) / (2 * totIM1[s, pc])}}}
+  
+    # Make inward & outward migration flows consistent with national net migration by sex-age cohorts
+    IM2 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    OM2 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          IM2[i, s, pc] = IM1[i, s, pc] * sf[s, pc]
+          OM2[i, s, pc] = OM1[i, s, pc] / sf[s, pc]}}}
+  
+    # Calculate inward & outward migration for each area summed over sex and age cohort
+    totIM2 = rep(0, numareas)
+    totOM2 = rep(0, numareas)
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          totIM2[i] = totIM2[i] + IM2[i, s, pc]
+          totOM2[i] = totOM2[i] + OM2[i, s, pc]}}}
+  
+    # Calculate required total inward migration
+    totin = rep(0, numareas)
+    for (i in 1:numareas){
+      totin[i] = requiredN[i] + totOM2[i]}
+  
+    # Adjust inward migration so that it gives the required local net migration total
+    IM3 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    OM3 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          IM3[i, s, pc] = IM2[i, s, pc] * totin[i] / totIM2[i]
+          OM3[i, s, pc] = OM2[i, s, pc]}}}
+  
+    # Check to ensure that net migration does not given a -ve population and adjust migration flows if necessary
+    IM4 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    OM4 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          tempcheck = LocalPop0[i, s, pc] - LocalDpc[i, s, pc] - OM3[i, s, pc] + IM3[i, s, pc]
+          if (tempcheck < 0){
+            OM4[i, s, pc] = OM3[i, s, pc] + 0.6 * tempcheck
+            IM4[i, s, pc] = IM3[i, s, pc] - 0.6 * tempcheck
+            print("Warning: Migration flows had to be adjusted to avoid negative population")}
+          else{
+            IM4[i, s, pc] = IM3[i, s, pc]
+            OM4[i, s, pc] = OM3[i, s, pc]}}}}
+  
+    # Check the difference between IM, OM 1 and 4 matrices
+    diffr = array(rep(0, 2 * numareas * 2 * (lastage + 1)), dim = c(2, numareas, 2, (lastage + 1)))
+    for (i in 1:numareas){
+      for (s in 1:2){
+        for (pc in 1:(lastage + 1)){
+          diffr[1, i, s, pc] = abs(IM4[i, s, pc] - IM1[i, s, pc])
+          diffr[2, i, s, pc] = abs(OM4[i, s, pc] - OM1[i, s, pc])}}}
+  
+    checkOK = array(rep(0, 2 * numareas * 2 * (lastage + 1)), dim = c(2, numareas, 2, (lastage + 1)))
+    totcheckOK = 0
+    for (k in 1:2){
+      for (i in 1:numareas){
+        for (s in 1:2){
+          for (pc in 1:(lastage + 1)){
+            if (diffr[k, i, s, pc] < smallnumber){
+              checkOK[k, i, s, pc] = 0}
+            else{
+              checkOK[k, i, s, pc] = 1
+              totcheckOK = totcheckOK + checkOK[k, i, s, pc]}}}}}
+  
+    # Check convergence
+    if (totcheckOK == 0){
+      for (i in 1:numareas){
+        for (s in 1:2){
+          for (pc in 1:(lastage + 1)){
+            scaledIM[i, s, pc] = IM4[i, s, pc]
+            scaledOM[i, s, pc] = OM4[i, s, pc]}}}
+      return (list("IM" = scaledIM, "OM" = scaledOM, "Log" = wb_wt_Log))}
+    else{
+      IM1 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+      OM1 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
+      for (i in 1:numareas){
+        for (s in 1:2){
+          for (pc in 1:(lastage + 1)){
+            IM1[i, s, pc] = IM4[i, s, pc]
+            OM1[i, s, pc] = OM4[i, s, pc]}}}}
+    # Continue looping
+  }
+}
