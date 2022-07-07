@@ -624,7 +624,7 @@ def writeAccount(wb_wt_Accounts, numareas, Areaname, lastage, sexlabel, pclabel,
                 if (pc == 0):
                     wb_wt_Accounts.cell(row, 3).value = tempbirthssex[i, s]
                 elif (pc > 0 and pc < lastage):
-                    wb_wt_Accounts.cell(row, 3).value = ERP[0, i, s, pc]
+                    wb_wt_Accounts.cell(row, 3).value = ERP[0, i, s, pc - 1]
                 else:
                     wb_wt_Accounts.cell(row, 3).value = ERP[0, i, s, lastage - 1] + ERP[0, i, s, lastage]
                 

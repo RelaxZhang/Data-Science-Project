@@ -158,7 +158,191 @@ scalingfactor2a = migData$scalingfactor2a
 scalingfactor2b = migData$scalingfactor2b
 ```
 
-### Write Input Data to Worksheet
+### Write Input Data to Worksheet (Accounts)
+```{r}
+# Write to Accounts.csv
+Accounts_area = rep(0, numareas * numages * 2)
+Accounts_sex = rep(0, numareas * numages * 2)
+Accounts_period_cohort = rep(0, numareas * numages * 2)
+Accounts_ERP_tb = rep(0, numareas * numages * 2)
+Accounts_Deaths = rep(0, numareas * numages * 2)
+Accounts_Netmig = rep(0, numareas * numages * 2)
+Accounts_ERP_tn = rep(0, numareas * numages * 2)
+Accounts_prelimmig = rep(0, numareas * numages * 2)
+Accounts_scaledmig = rep(0, numareas * numages * 2)
+Accounts_prelimin = rep(0, numareas * numages * 2)
+Accounts_prelimout = rep(0, numareas * numages * 2)
+Accounts_scalingraw = rep(0, numareas * numages * 2)
+Accounts_scalingsmooth = rep(0, numareas * numages * 2)
+Accounts_inmig = rep(0, numareas * numages * 2)
+Accounts_outmig = rep(0, numareas * numages * 2)
+Accounts_adjmig = rep(0, numareas * numages * 2)
+
+index = 0
+for (i in 1:numareas){
+  for (s in 1:2){
+    for (a in 1:numages){
+      index = index + 1
+      
+      if (s == 1){
+        if (a == 1){
+          Accounts_ERP_tb[index] = tempbirthssex[i, s]}
+        else if (a == numages){
+          Accounts_ERP_tb[index] = ERP[1, i, s, lastage] + ERP[1, i, s, lastage + 1]}
+        else{
+          Accounts_ERP_tb[index] = ERP[1, i, s, a - 1]}
+        
+        Accounts_area[index] = Areaname[i]
+        Accounts_sex[index] = sexlabel[s]
+        Accounts_period_cohort[index] = pclabel[a]
+        Accounts_ERP_tn[index] = ERP[2, i, s, a]
+        Accounts_Deaths[index] = tempdeaths[i, s, a]
+        Accounts_Netmig[index] = cohortnetmig[i, s, a]
+        Accounts_prelimmig[index] = prelimmig[i, s, a]
+        Accounts_scaledmig[index] = scaledmig[i, s, a]
+        Accounts_prelimin[index] = prelimbaseinward[i, s, a]
+        Accounts_prelimout[index] = prelimbaseoutward[i, s, a]
+        Accounts_scalingraw[index] = scalingfactor2a[i, s, a]
+        Accounts_scalingsmooth[index] = scalingfactor2b[i, s, a]
+        Accounts_inmig[index] = inward[1, i, s, a]
+        Accounts_outmig[index] = outward[i, s, a]
+        Accounts_adjmig[index] = adjnetmig[i, s, a]}
+      
+      else{
+        if (a == 1){
+          Accounts_ERP_tb[index] = tempbirthssex[i, s]}
+        else if (a == numages){
+          Accounts_ERP_tb[index] = ERP[1, i, s, lastage] + ERP[1, i, s, lastage + 1]}
+        else{
+          Accounts_ERP_tb[index] = ERP[1, i, s, a - 1]}
+        
+        Accounts_area[index] = Areaname[i]
+        Accounts_sex[index] = sexlabel[s]
+        Accounts_period_cohort[index] = pclabel[a]
+        Accounts_ERP_tn[index] = ERP[2, i, s, a]
+        Accounts_Deaths[index] = tempdeaths[i, s, a]
+        Accounts_Netmig[index] = cohortnetmig[i, s, a]
+        Accounts_prelimmig[index] = prelimmig[i, s, a]
+        Accounts_scaledmig[index] = scaledmig[i, s, a]
+        Accounts_prelimin[index] = prelimbaseinward[i, s, a]
+        Accounts_prelimout[index] = prelimbaseoutward[i, s, a]
+        Accounts_scalingraw[index] = scalingfactor2a[i, s, a]
+        Accounts_scalingsmooth[index] = scalingfactor2b[i, s, a]
+        Accounts_inmig[index] = inward[1, i, s, a]
+        Accounts_outmig[index] = outward[i, s, a]
+        Accounts_adjmig[index] = adjnetmig[i, s, a]}}}}
+
+accounts_data = data.frame(Accounts_area, Accounts_sex, Accounts_period_cohort, Accounts_ERP_tb,
+                           Accounts_Deaths, Accounts_Netmig, Accounts_ERP_tn, Accounts_prelimmig,
+                           Accounts_scaledmig, Accounts_prelimin, Accounts_prelimout, Accounts_scalingraw,
+                           Accounts_scalingsmooth, Accounts_inmig, Accounts_outmig, Accounts_adjmig)
+colnames(accounts_data) <- c("Area", "Sex", "Period-Cohort", "ERP(t-5)", "Deaths", "Net mig", "ERP(t)", 
+                             "Prelim mig (model rates x pop-at-risk)", "Scaled mig (adjusted for pop size)", 
+                             "Prelim in (consistent with total net mig)", "Prelim out (consistent with total net mig)", 
+                             "scaling factor a (unsmoothed)", "scaling factor b (smoothed)", 
+                             "In-mig (consistent with cohort net mig)", "Out-mig (consistent with cohort net mig)", 
+                             "Adjusted net mig")
+write.csv(accounts_data, file = "./Output_CSV/Accounts.csv", row.names = FALSE)
+```
+
+### Write Input Data to Worksheet (SmallAreaInputs)
+```{r}
+# Write to SmallAreaInputs.csv
+SmallAreaInputs_index = rep(0, numareas * numages)
+SmallAreaInputs_code = rep(0, numareas * numages)
+SmallAreaInputs_name = rep(0, numareas * numages)
+SmallAreaInputs_pc = rep(0, numareas * numages)
+
+SmallAreaInputs_FASDR20 = rep(0, numareas * numages)
+SmallAreaInputs_FASDR25 = rep(0, numareas * numages)
+SmallAreaInputs_FASDR30 = rep(0, numareas * numages)
+SmallAreaInputs_MASDR20 = rep(0, numareas * numages)
+SmallAreaInputs_MASDR25 = rep(0, numareas * numages)
+SmallAreaInputs_MASDR30 = rep(0, numareas * numages)
+
+SmallAreaInputs_FASOMR20 = rep(0, numareas * numages)
+SmallAreaInputs_FASOMR25 = rep(0, numareas * numages)
+SmallAreaInputs_FASOMR30 = rep(0, numareas * numages)
+SmallAreaInputs_MASOMR20 = rep(0, numareas * numages)
+SmallAreaInputs_MASOMR25 = rep(0, numareas * numages)
+SmallAreaInputs_MASOMR30 = rep(0, numareas * numages)
+
+SmallAreaInputs_Fin20 = rep(0, numareas * numages)
+SmallAreaInputs_Fin25 = rep(0, numareas * numages)
+SmallAreaInputs_Fin30 = rep(0, numareas * numages)
+SmallAreaInputs_Min20 = rep(0, numareas * numages)
+SmallAreaInputs_Min25 = rep(0, numareas * numages)
+SmallAreaInputs_Min30 = rep(0, numareas * numages)
+
+SmallAreaInputs_ASFR_Age = rep(NaN, numareas * numages)
+SmallAreaInputs_ASFR20 = rep(NaN, numareas * numages)
+SmallAreaInputs_ASFR25 = rep(NaN, numareas * numages)
+SmallAreaInputs_ASFR30 = rep(NaN, numareas * numages)
+
+index = 0
+for (i in 1:numareas){
+  for (pc in 1:(lastage + 1)){
+    index = index + 1
+    
+    SmallAreaInputs_index[index] = i
+    SmallAreaInputs_code[index] = Areacode[i]
+    SmallAreaInputs_name[index] = Areaname[i]
+    SmallAreaInputs_pc[index] = pclabel[pc]
+    
+    SmallAreaInputs_FASDR20[index] = ASDR[2, i, 1, pc]
+    SmallAreaInputs_FASDR25[index] = ASDR[3, i, 1, pc]
+    SmallAreaInputs_FASDR30[index] = ASDR[4, i, 1, pc]
+    SmallAreaInputs_MASDR20[index] = ASDR[2, i, 2, pc]
+    SmallAreaInputs_MASDR25[index] = ASDR[3, i, 2, pc]
+    SmallAreaInputs_MASDR30[index] = ASDR[4, i, 2, pc]
+    
+    SmallAreaInputs_FASOMR20[index] = ASOMR[2, i, 1, pc]
+    SmallAreaInputs_FASOMR25[index] = ASOMR[3, i, 1, pc]
+    SmallAreaInputs_FASOMR30[index] = ASOMR[4, i, 1, pc]
+    SmallAreaInputs_MASOMR20[index] = ASOMR[2, i, 2, pc]
+    SmallAreaInputs_MASOMR25[index] = ASOMR[3, i, 2, pc]
+    SmallAreaInputs_MASOMR30[index] = ASOMR[4, i, 2, pc]
+    
+    SmallAreaInputs_Fin20[index] = inward[2, i, 1, pc]
+    SmallAreaInputs_Fin25[index] = inward[3, i, 1, pc]
+    SmallAreaInputs_Fin30[index] = inward[4, i, 1, pc]
+    SmallAreaInputs_Min20[index] = inward[2, i, 2, pc]
+    SmallAreaInputs_Min25[index] = inward[3, i, 2, pc]
+    SmallAreaInputs_Min30[index] = inward[4, i, 2, pc]
+    
+    if (pc > 4 & pc < 12){
+      SmallAreaInputs_ASFR_Age[index] = agelabel[pc - 1]
+      SmallAreaInputs_ASFR20[index] = ASFR[2, i, pc - 4]
+      SmallAreaInputs_ASFR25[index] = ASFR[3, i, pc - 4]
+      SmallAreaInputs_ASFR30[index] = ASFR[4, i, pc - 4]}}}
+
+smallareainputs_data = data.frame(SmallAreaInputs_index, SmallAreaInputs_code, SmallAreaInputs_name,
+                                  SmallAreaInputs_pc, SmallAreaInputs_FASDR20, SmallAreaInputs_FASDR25,
+                                  SmallAreaInputs_FASDR30, SmallAreaInputs_MASDR20, SmallAreaInputs_MASDR25,
+                                  SmallAreaInputs_MASDR30, SmallAreaInputs_FASOMR20, SmallAreaInputs_FASOMR25,
+                                  SmallAreaInputs_FASOMR30, SmallAreaInputs_MASOMR20, SmallAreaInputs_MASOMR25,
+                                  SmallAreaInputs_MASOMR30, SmallAreaInputs_Fin20, SmallAreaInputs_Fin25, 
+                                  SmallAreaInputs_Fin30, SmallAreaInputs_Min20, SmallAreaInputs_Min25,
+                                  SmallAreaInputs_Min30, SmallAreaInputs_ASFR_Age, SmallAreaInputs_ASFR20,
+                                  SmallAreaInputs_ASFR25, SmallAreaInputs_ASFR30)
+
+colnames(smallareainputs_data) <- c("Index", "Code", "Area", "Period-Cohort", paste("F_ASDRs ", labels_other_key[2, 2]),
+                                    paste("F_ASDRs ", labels_other_key[3, 2]), paste("F_ASDRs ", labels_other_key[4, 2]),
+                                    paste("M_ASDRs ", labels_other_key[2, 2]), paste("M_ASDRs ", labels_other_key[3, 2]),
+                                    paste("M_ASDRs ", labels_other_key[4, 2]), paste("F_ASOMRs ", labels_other_key[2, 2]),
+                                    paste("F_ASOMRs ", labels_other_key[3, 2]), paste("F_ASOMRs ", labels_other_key[4, 2]),
+                                    paste("M_ASOMRs ", labels_other_key[2, 2]), paste("M_ASOMRs ", labels_other_key[3, 2]),
+                                    paste("M_ASOMRs ", labels_other_key[4, 2]), paste("F_inward ", labels_other_key[2, 2]),
+                                    paste("F_inward ", labels_other_key[3, 2]), paste("F_inward ", labels_other_key[4, 2]),
+                                    paste("M_inward ", labels_other_key[2, 2]), paste("M_inward ", labels_other_key[3, 2]),
+                                    paste("M_inward ", labels_other_key[4, 2]), "Age-Cohort", paste("ASFRs ", labels_other_key[2, 2]),
+                                    paste("ASFRs ", labels_other_key[3, 2]), paste("ASFRs ", labels_other_key[4, 2]))
+write.csv(smallareainputs_data, file = "./Output_CSV/SmallAreaInputs.csv", row.names = FALSE)
+```
+
+# SyntheticProjectionModel
+## Start Generating Projection Data
+### Define Variables
 ```{r}
 
 ```

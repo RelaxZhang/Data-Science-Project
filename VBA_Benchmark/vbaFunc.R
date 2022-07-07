@@ -371,7 +371,7 @@ inputMigration <- function(final, numareas, lastage, modelASMR, ERP, totmig, Tot
           for (pc in 1:(lastage - 1)){
             inward[1, i, s, pc] = intemp[s, pc]}
           for (pc in lastage:(lastage + 1)){
-            inward[1, i, s, pc] = 1 / 2 * (intemp[1, pc] + intemp[1, pc])}}
+            inward[1, i, s, pc] = 1 / 2 * (intemp[1, pc] + intemp[2, pc])}}
 
         # Calculate ASOMR (Area Specific Out Migration Rate)
         for (s in 1:2){
