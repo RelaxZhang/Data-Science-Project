@@ -1309,7 +1309,7 @@ def write_Components(Components, wb_wt_Components, numareas, final):
     return wb_wt_Components
 
 '''Function for writing data into Target Sheet for visualisation'''
-def write_Target(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, numages):
+def write_Target(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, numages, AgeSexForecasts):
 
     # Select the target area and year
     area_index = AgeSexForecasts["Area name"].unique().tolist().index(Target_Area)
