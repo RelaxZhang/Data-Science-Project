@@ -1038,7 +1038,7 @@ def writeProj(wb_wt_AgeSexForecasts, wb_wt_Components, yearlabel, intervallabel,
 
 #################################################################################################################################################################
 '''Function for writing target data into Sheet for visualisation'''
-def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearlabel, Population, numages, sexlabel, agelabel):
+def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearlabel, Population, numages, agelabel):
 
     # Select the target area and year
     area_index = Areaname.index(Target_Area)
@@ -1078,6 +1078,272 @@ def writeTarget(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, Areaname, yearl
         wb_wt_Target.cell(row, 3).value = jump_male[i]
         wb_wt_Target.cell(row, 5).value = proj_female[i]
         wb_wt_Target.cell(row, 6).value = proj_male[i]
+        row += 1
+    
+    return wb_wt_Target
+
+#################################################################################################################################################################
+'''Function for Writing CSV into the Accounts Sheet'''
+def write_Accounts(Accounts, wb_wt_Accounts, numages):
+
+    # Write headings to Sheet
+    wb_wt_Accounts.cell(3, 3).value = "ERP(t-5)"
+    wb_wt_Accounts.cell(3, 4).value = "Deaths"
+    wb_wt_Accounts.cell(3, 5).value = "Net mig"
+    wb_wt_Accounts.cell(3, 6).value = "ERP(t)"
+    wb_wt_Accounts.cell(3, 8).value = "Prelim mig (model rates x pop-at-risk)"
+    wb_wt_Accounts.cell(3, 9).value = "Scaled mig (adjusted for pop size)"
+    wb_wt_Accounts.cell(3, 10).value = "Prelim in (consistent with total net mig)"
+    wb_wt_Accounts.cell(3, 11).value = "Prelim out (consistent with total net mig)"
+    wb_wt_Accounts.cell(3, 12).value = "scaling factor a (unsmoothed)"
+    wb_wt_Accounts.cell(3, 13).value = "scaling factor b (smoothed)"
+    wb_wt_Accounts.cell(3, 14).value = "In-mig (consistent with cohort net mig)"
+    wb_wt_Accounts.cell(3, 15).value = "Out-mig (consistent with cohort net mig)"
+    wb_wt_Accounts.cell(3, 16).value = "Adjusted net mig"
+
+    row = 4
+    for i in range(len(Accounts["Area"].unique())):
+        wb_wt_Accounts.cell(row, 1).value = str(i + 1) + " " + Accounts["Area"].unique()[i]
+        row += (1 + 2 * numages + 1)
+
+    # Write data to Sheet
+    row = 4
+    index = 0
+    for i in range(len(Accounts)):
+        if (index == 2 * numages):
+            index = 0
+            row += 2
+        index += 1
+        row += 1
+        wb_wt_Accounts.cell(row, 1).value = Accounts.iloc[i, 1]
+        wb_wt_Accounts.cell(row, 2).value = Accounts.iloc[i, 2]
+        wb_wt_Accounts.cell(row, 3).value = Accounts.iloc[i, 3]
+        wb_wt_Accounts.cell(row, 4).value = Accounts.iloc[i, 4]
+        wb_wt_Accounts.cell(row, 5).value = Accounts.iloc[i, 5]
+        wb_wt_Accounts.cell(row, 6).value = Accounts.iloc[i, 6]
+        wb_wt_Accounts.cell(row, 8).value = Accounts.iloc[i, 7]
+        wb_wt_Accounts.cell(row, 9).value = Accounts.iloc[i, 8]
+        wb_wt_Accounts.cell(row, 10).value = Accounts.iloc[i, 9]
+        wb_wt_Accounts.cell(row, 11).value = Accounts.iloc[i, 10]
+        wb_wt_Accounts.cell(row, 12).value = Accounts.iloc[i, 11]
+        wb_wt_Accounts.cell(row, 13).value = Accounts.iloc[i, 12]
+        wb_wt_Accounts.cell(row, 14).value = Accounts.iloc[i, 13]
+        wb_wt_Accounts.cell(row, 15).value = Accounts.iloc[i, 14]
+        wb_wt_Accounts.cell(row, 16).value = Accounts.iloc[i, 15]
+
+    return wb_wt_Accounts
+
+'''Sub-function for writing input data (Headings) to SmallAreaInputs Sheet'''
+def SAIHead(head, final, intervallabel, wb_wt_SmallAreaInputs, col):
+    for y in range(final):
+        col += 1
+        wb_wt_SmallAreaInputs.cell(3, col).value = head
+        wb_wt_SmallAreaInputs.cell(4, col).value = intervallabel[y]
+    col += 1
+    return col, wb_wt_SmallAreaInputs
+
+'''Function for Writing CSV into the SmallAreaInputs Sheet'''
+def write_SmallAreaInputs(SmallAreaInputs, wb_wt_SmallAreaInputs, numages, numareas, final):
+    
+    SmallAreaInputs.columns
+    intervallabel= []
+    for i in range(4, 4 + final):
+        intervallabel.append(SmallAreaInputs.columns[i].split(" ")[1])
+    intervallabel
+
+    col = 4
+
+    # Record Headings for SmallAreaInputs sheet
+    col, wb_wt_SmallAreaInputs = SAIHead("F ASDRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = SAIHead("M ASDRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = SAIHead("F ASOMRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = SAIHead("M ASOMRs", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = SAIHead("F inward", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = SAIHead("M inward", final, intervallabel, wb_wt_SmallAreaInputs, col)
+    col, wb_wt_SmallAreaInputs = SAIHead("ASFRs", final, intervallabel, wb_wt_SmallAreaInputs, col + 1)
+
+    # Write data to Sheet
+    row = 4
+    for i in range(numages * numareas):
+        row += 1
+        wb_wt_SmallAreaInputs.cell(row, 1).value = SmallAreaInputs.iloc[i, 0]
+        wb_wt_SmallAreaInputs.cell(row, 2).value = SmallAreaInputs.iloc[i, 1]
+        wb_wt_SmallAreaInputs.cell(row, 3).value = SmallAreaInputs.iloc[i, 2]
+        wb_wt_SmallAreaInputs.cell(row, 4).value = SmallAreaInputs.iloc[i, 3]
+        wb_wt_SmallAreaInputs.cell(row, 4 + 6 * (final + 1) + 1).value = SmallAreaInputs.iloc[i, 3 + final * 6 + 1]
+        for y in range(final):
+            wb_wt_SmallAreaInputs.cell(row, 4 + y + 1).value = SmallAreaInputs.iloc[i, 4 + y]
+            wb_wt_SmallAreaInputs.cell(row, 4 + final + 1 + y + 1).value = SmallAreaInputs.iloc[i, 4 + final + y]
+            wb_wt_SmallAreaInputs.cell(row, 4 + 2 * final + 1 + y + 1 + 1).value = SmallAreaInputs.iloc[i, 4 + 2 * final + y]
+            wb_wt_SmallAreaInputs.cell(row, 4 + 3 * final + 1 + y + 1 + 1 + 1).value = SmallAreaInputs.iloc[i, 4 + 3 * final + y]
+            wb_wt_SmallAreaInputs.cell(row, 4 + 4 * final + 1 + y + 1 + 1 + 1 + 1).value = SmallAreaInputs.iloc[i, 4 + 4 * final + y]
+            wb_wt_SmallAreaInputs.cell(row, 4 + 5 * final + 1 + y + 1 + 1 + 1 + 1 + 1).value = SmallAreaInputs.iloc[i, 4 + 5 * final + y]
+            wb_wt_SmallAreaInputs.cell(row, 4 + 6 * final + 1 + y + 1 + 1 + 1 + 1 + 1 + 1 + 1).value = SmallAreaInputs.iloc[i, 4 + 6 * final + y + 1]
+
+    return wb_wt_SmallAreaInputs
+
+'''Function for Writing CSV into the Log Sheet'''
+def write_Log(Log, wb_wt_Log, final):
+
+    row = 3
+    wb_wt_Log.cell(row, 1).value = Log.columns.tolist()[0]
+    wb_wt_Log.cell(row, 2).value = Log.columns.tolist()[1]
+    wb_wt_Log.cell(row, 3).value = Log.columns.tolist()[2]
+    for i in range(final):
+        row += 1
+        wb_wt_Log.cell(row, 1).value = Log.iloc[i, 0]
+        wb_wt_Log.cell(row, 2).value = Log.iloc[i, 1]
+        wb_wt_Log.cell(row, 3).value = Log.iloc[i, 2]
+
+    return wb_wt_Log
+
+'''Function for Writing CSV into the CheckMig Sheet'''
+def write_CheckMig(CheckMig, wb_wt_CheckMig, numareas, numages, final):
+
+    namelist = CheckMig.columns.tolist()[3:(3+numareas)]
+
+    # Write headings to Sheet
+    row = 2
+    for i in range(numareas):
+        wb_wt_CheckMig.cell(row, 4 + i).value = i + 1
+        wb_wt_CheckMig.cell(row + 1, 4 + i).value = namelist[i]
+        wb_wt_CheckMig.cell(row, 4 + numareas + 3 + i).value = i + 1
+        wb_wt_CheckMig.cell(row + 1, 4 + numareas + 3 + i).value = namelist[i]
+    wb_wt_CheckMig.cell(row + 1, 4 + 2 * numareas + 3).value = CheckMig.columns.tolist()[-1]
+
+    # Write data to Sheet
+    row = 4
+    row_nnm = 0
+    index = 0
+    for y in range(final):
+        for i in range(2 * numages):
+            wb_wt_CheckMig.cell(row + 1, 3 + 2 * numareas + 3 + 1).value = CheckMig.iloc[row_nnm, 2 * numareas + 3]
+            row_nnm += 1
+            row += 1
+            col = 3
+            for a in range(numareas):
+                wb_wt_CheckMig.cell(row, col - 2).value = CheckMig.iloc[index, col - 3]
+                wb_wt_CheckMig.cell(row, col - 1).value = CheckMig.iloc[index, col - 2]
+                wb_wt_CheckMig.cell(row, col).value = CheckMig.iloc[index, col - 1]
+                wb_wt_CheckMig.cell(row, col + 1).value = CheckMig.iloc[index, col]
+                wb_wt_CheckMig.cell(row, col + numareas + 3 + 1).value = CheckMig.iloc[index, col + numareas]
+                col += 1
+            index += 1
+        row += 2
+
+    return wb_wt_CheckMig
+
+'''Function for Writing CSV into the CheckDeaths Sheet'''
+def write_CheckDeaths(CheckDeaths, wb_wt_CheckDeaths, numareas, numages, final):
+
+    namelist = CheckDeaths.columns.tolist()[3:(3+numareas)]
+
+    # Write headings to Sheet
+    row = 2
+    for i in range(numareas):
+        wb_wt_CheckDeaths.cell(row, 4 + i).value = i + 1
+        wb_wt_CheckDeaths.cell(row + 1, 4 + i).value = namelist[i]
+    wb_wt_CheckDeaths.cell(row + 1, 4 + numareas).value = CheckDeaths.columns.tolist()[-1]
+
+    # Write data to Sheet
+    row = 4
+    row_nnm = 0
+    index = 0
+    for y in range(final):
+        for i in range(2 * numages):
+            wb_wt_CheckDeaths.cell(row + 1, 3 + numareas + 1).value = CheckDeaths.iloc[row_nnm, numareas + 3]
+            row_nnm += 1
+            row += 1
+            col = 3
+            for a in range(numareas):
+                wb_wt_CheckDeaths.cell(row, col - 2).value = CheckDeaths.iloc[index, col - 3]
+                wb_wt_CheckDeaths.cell(row, col - 1).value = CheckDeaths.iloc[index, col - 2]
+                wb_wt_CheckDeaths.cell(row, col).value = CheckDeaths.iloc[index, col - 1]
+                wb_wt_CheckDeaths.cell(row, col + 1).value = CheckDeaths.iloc[index, col]
+                col += 1
+            index += 1
+        row += 2
+
+    return wb_wt_CheckDeaths
+
+'''Function for Writing CSV into the AgeSexForecasts Sheet'''
+def write_AgeSexForecasts(AgeSexForecasts, wb_wt_AgeSexForecasts):
+
+    # Write headings to Sheet
+    name_list = AgeSexForecasts.columns.tolist()
+    row = 3
+    col = 0
+    for i in range(len(name_list)):
+        col += 1
+        wb_wt_AgeSexForecasts.cell(row, col).value = name_list[i]
+    
+    # Write data to Sheet
+    for i in range(len(AgeSexForecasts)):
+        row += 1
+        col = 0
+        for c in range(len(name_list)):
+            col += 1
+            wb_wt_AgeSexForecasts.cell(row, col).value = AgeSexForecasts.iloc[i, c]
+    
+    return wb_wt_AgeSexForecasts
+
+'''Function for Writing CSV into the Components Sheet'''
+def write_Components(Components, wb_wt_Components, numareas, final):
+
+    # Write headings to Sheet
+    row = 3
+    list_name = Components.columns.tolist()[1:]
+    for i in range(len(list_name)):
+        wb_wt_Components.cell(row, i + 1 + 1).value = list_name[i]
+    
+    # Write data to Sheet
+    index = 0
+    for a in range(numareas):
+        for i in range(6):
+            row += 1
+            for c in range(1 + final):
+                wb_wt_Components.cell(row, c + 1).value = Components.iloc[index, c]
+            index += 1
+        row += 1
+    
+    return wb_wt_Components
+
+'''Function for writing data into Target Sheet for visualisation'''
+def write_Target(wb_wt_Target, Target_Area, Jump_Year, Proj_Year, numages):
+
+    # Select the target area and year
+    area_index = AgeSexForecasts["Area name"].unique().tolist().index(Target_Area)
+    area_start = area_index * 36
+    area_end = (area_index + 1) * 36
+    target_data = AgeSexForecasts.iloc[area_start:area_end, ]
+
+    jump_index = AgeSexForecasts.columns.tolist().index(str(Jump_Year))
+    proj_index = AgeSexForecasts.columns.tolist().index(str(Proj_Year))
+    jump_data = target_data.iloc[0:, jump_index]
+    proj_data = target_data.iloc[0:, proj_index]
+
+    # Write target value into Graphs for Visualisation
+    wb_wt_Target.cell(1, 1).value = "Summary of Population Projections"
+    wb_wt_Target.cell(3, 1).value = "Selected Area"
+    wb_wt_Target.cell(5, 1).value = str(area_index + 1) + " " + Target_Area
+    wb_wt_Target.cell(7, 1).value = "Selected Projection Year"
+    wb_wt_Target.cell(8, 1).value = Proj_Year
+    wb_wt_Target.cell(10, 1).value = "Age"
+    wb_wt_Target.cell(10, 2).value = "Jump-off-female"
+    wb_wt_Target.cell(10, 3).value = "Jump-off-male"
+    wb_wt_Target.cell(10, 4).value = "Age" 
+    wb_wt_Target.cell(10, 5).value = "Projection-female"
+    wb_wt_Target.cell(10, 6).value = "Projection-male"
+
+    # Write age, sex labels and data to Target Sheet
+    row = 11
+    for i in range(numages):
+        wb_wt_Target.cell(row, 1).value = target_data["Age group"][i + area_start]
+        wb_wt_Target.cell(row, 2).value = jump_data[i + area_start]
+        wb_wt_Target.cell(row, 3).value = jump_data[i + numages + area_start] * (-1)
+        wb_wt_Target.cell(row, 4).value = target_data["Age group"][i + numages + area_start]
+        wb_wt_Target.cell(row, 5).value = proj_data[i + area_start]
+        wb_wt_Target.cell(row, 6).value = proj_data[i + numages + area_start] * (-1)
         row += 1
     
     return wb_wt_Target
