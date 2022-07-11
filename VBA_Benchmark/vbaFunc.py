@@ -3,12 +3,12 @@ import numpy
 #################################################################################################################################################################
 '''Function for generating 3-Dimension jumpoffERP Array'''
 def jumpoff(numareas, numages, jumpoffERP, sheet_agesex, set_year_female, set_year_male):
-    row = 3
+    row = 4
     for i in range(numareas):
         for a in range(numages):
             row += 1
-            jumpoffERP[i, 0, a] = sheet_agesex.cell_value(row, set_year_female)
-            jumpoffERP[i, 1, a] = sheet_agesex.cell_value(row, set_year_male)
+            jumpoffERP[i, 0, a] = sheet_agesex.cell(row, set_year_female).value
+            jumpoffERP[i, 1, a] = sheet_agesex.cell(row, set_year_male).value
 
     # Return jumoffERP for further calculation
     return jumpoffERP
