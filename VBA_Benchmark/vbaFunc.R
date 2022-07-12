@@ -566,7 +566,7 @@ NetMigAdjustment2 <- function(labely, prelimIMpc, prelimOMpc, NatN, requiredN, L
   for (s in 1:2){
     for (pc in 1:(lastage + 1)){
       totN2 = totN2 + NatN[s, pc]}}
-
+  
   IM1 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
   OM1 = array(rep(0, numareas * 2 * (lastage + 1)), dim = c(numareas, 2, (lastage + 1)))
   for (i in 1:numareas){

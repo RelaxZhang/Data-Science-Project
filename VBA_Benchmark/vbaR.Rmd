@@ -35,11 +35,11 @@ totNetMig <- read.csv("./Input_CSV/totNetMig.csv")
 
 # Define Variables
 ```{r}
-numareas = labels_other_key[1, 7]       # Number of small areas
-numages = age_cohorts[18, 1]            # Number of age groups in ERPs
+numareas = labels_other_key[1, 7]       # Number of small areas (flex)
+numages = age_cohorts[18, 1]            # Number of age groups in ERPs (index flex)
 lastage = age_cohorts[18, 3]            # Number of period cohorts
-final = labels_other_key[1, 6]          # Final projection year number
-SRB = otherFertility[1, 3]              # Sex Ratio at Birth (Male : Female)
+final = labels_other_key[1, 6]          # Final projection year number (flex)
+SRB = otherFertility[1, 3]              # Sex Ratio at Birth (Male : Female) (flex)
 modelTFR  = otherFertility[1, 2]        # Model TFR Parameter
 nLxMS = length(Mortality) - 2           # nLx mortality surface groups
 age_ASFR = length(otherFertility[, 1])  # Age groups amount in ASFRs
@@ -96,7 +96,7 @@ totmig = migTurnover[, 4]
 modelASMR = t(migRate[, 2:3])
 ```
 
-### Some Checks (Need further confirmation)
+### Some Checks
 ```{r}
 # TFRs > 0
 for (i in 1:(final + 1)){
@@ -428,7 +428,7 @@ for (y in 2:(final + 1)){
      
     # Record the number of iteration required
     wb_wt_Log[y - 1, 2] = q
-     
+    
     # For the first iteration, the end-of-interval population is set (avoid a negative projected population)
     if (q == 1){
       for (i in 1:numareas){
