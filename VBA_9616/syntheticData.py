@@ -222,3 +222,35 @@ def VSG(jumpoff_year, target_final_year, df_ERPs, growth, growth_rate, gap, targ
     # Return dataframe from VSG_Model
     df_VSG_year = pd.DataFrame(VSG_year_dict)
     return df_VSG_year
+
+'''Function for generating unconstrained total population with LINEXP_Model'''
+def LINEXP(jumpoff_year, target_year, growth, growth_rate, df_ERPs):
+
+    base_year = df_ERPs[str(jumpoff_year)]
+    LINEXP_dict = {str(jumpoff_year) : base_year}
+    for i in range(target_year - jumpoff_year):
+        project_year = []
+        for j in range(len(growth)):
+            if growth[j] >= 0:
+                project_year.append(base_year[j] + growth[j])
+            else:
+                project_year.append(base_year[j] * math.exp(growth_rate[j]))
+        base_year = project_year
+        LINEXP_dict[str(jumpoff_year + 1 + i)] = project_year
+    
+    df_LINEXP = pd.DataFrame(LINEXP_dict)
+    return df_LINEXP
+
+'''Function for generating constrained total population with LINEXP_Model and 2 types of NationalProjection input data'''
+def constrainLINEXP(df_LINEXP, jumpoff_year, target_year, df_CSP, gap):
+    
+    constrainLINEXP = {str(jumpoff_year) : df_LINEXP[str(jumpoff_year)].tolist()}
+    for j in range(int((target_year - jumpoff_year) / gap)):
+        year = []
+        for i in range(len(df_LINEXP[str(jumpoff_year)])):
+            year.append(df_LINEXP[str(jumpoff_year + gap)][i] * sum(df_CSP[str(jumpoff_year + gap)].tolist()) / sum(df_LINEXP[str(jumpoff_year + gap)].tolist()))
+        constrainLINEXP[str(jumpoff_year + gap + j)] = year
+        jumpoff_year += gap
+    
+    df_constrainLINEXP = pd.DataFrame(constrainLINEXP)
+    return df_constrainLINEXP
