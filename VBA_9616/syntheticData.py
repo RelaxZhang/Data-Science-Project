@@ -101,6 +101,18 @@ def growthRate(previous, jump, df_ERPs):
             growth_rate.append(math.log(df_ERPs[str(jump)][i] / df_ERPs[str(previous)][i]) / (jump - previous))
     return growth, growth_rate
 
+''' Function for generating special NationalProjection Data from the 4-datapoint list'''
+def spec4NPT(target_4NPT, gap):
+    target_spec_4NPT = []
+    for i in range(len(target_4NPT) - 1):
+        target_spec_4NPT.append(target_4NPT[i])
+        target_spec_4NPT.append(target_4NPT[i] + (target_4NPT[i + 1] - target_4NPT[i]) / gap * 1)
+        target_spec_4NPT.append(target_4NPT[i] + (target_4NPT[i + 1] - target_4NPT[i]) / gap * 2)
+        target_spec_4NPT.append(target_4NPT[i] + (target_4NPT[i + 1] - target_4NPT[i]) / gap * 3)
+        target_spec_4NPT.append(target_4NPT[i] + (target_4NPT[i + 1] - target_4NPT[i]) / gap * 4)
+    target_spec_4NPT.append(target_4NPT[-1])
+    return target_spec_4NPT
+
 '''Generalised CSP_model Function'''
 def CSP(ERP_list, target_NPT, column_name):
     
@@ -153,3 +165,60 @@ def MEX(jumpoff, target_final, df_ERPs, pop_ceil, growth_rate):
     
     # Return MEX_Model Result
     return df_MEX
+
+'''Function for generating total population with VSG_Model'''
+def VSG(jumpoff_year, target_final_year, df_ERPs, growth, growth_rate, gap, target_NPT):
+    
+    VSG_year_base = df_ERPs[str(jumpoff_year)]
+    VSG_growth_dict = {}
+    VSG_growth_abs_dict = {}
+    VSG_growth_scale_dict = {}
+    VSG_year_dict = {str(jumpoff_year) : VSG_year_base}
+
+    year_list = [jumpoff_year]
+    for i in range(jumpoff_year, target_final_year):
+        if jumpoff_year < target_final_year:
+            year_list.append(jumpoff_year + gap)
+            jumpoff_year += gap
+
+    for i in range(len(year_list) - 1):
+        VSG_growth = []
+        VSG_growth_abs = []
+        VSG_growth_scale = []
+        VSG_year_proj = []
+
+        # Record VSG growth & abs growth amount in each region
+        for j in range(len(VSG_year_base)):
+            if (growth[j] >= 0):
+                VSG_growth.append(growth[j])
+                VSG_growth_abs.append(growth[j])
+            else:
+                VSG_growth.append(VSG_year_base[j] * math.exp(growth_rate[j]) - VSG_year_base[j])
+                VSG_growth_abs.append(abs(VSG_year_base[j] * math.exp(growth_rate[j]) - VSG_year_base[j]))
+        
+        # Record scaled VSG
+        sum_growth = sum(VSG_growth)
+        sum_growth_abs = sum(VSG_growth_abs)
+        scale_tot_diff = target_NPT[i + 1] - target_NPT[i]
+        scale_pos = (sum_growth_abs + (scale_tot_diff - sum_growth)) / sum_growth_abs
+        scale_neg = (sum_growth_abs - (scale_tot_diff - sum_growth)) / sum_growth_abs
+        for j in range(len(VSG_year_base)):
+            if (VSG_growth[j] > 0):
+                VSG_growth_scale.append(VSG_growth[j] * scale_pos)
+            else:
+                VSG_growth_scale.append(VSG_growth[j] * scale_neg)
+        
+        # Record new projection data
+        for j in range(len(VSG_year_base)):
+            VSG_year_proj.append(VSG_year_base[j] + VSG_growth_scale[j])
+
+        # Update base year data
+        VSG_year_base = VSG_year_proj
+        VSG_growth_dict[str(year_list[i]) + "-" + str(year_list[i + 1])] = VSG_growth
+        VSG_growth_abs_dict[str(year_list[i]) + "-" + str(year_list[i + 1])] = VSG_growth_abs
+        VSG_growth_scale_dict[str(year_list[i]) + "-" + str(year_list[i + 1])] = VSG_growth_scale
+        VSG_year_dict[str(year_list[i + 1])] = VSG_year_proj
+
+    # Return dataframe from VSG_Model
+    df_VSG_year = pd.DataFrame(VSG_year_dict)
+    return df_VSG_year
