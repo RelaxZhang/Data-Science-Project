@@ -377,7 +377,7 @@ for (y in 1:(final + 1)){
       checktot2 = checktot2 + NatP[y, s, a]}}
     
   if (abs(checktot1 - checktot2) > smallnumber){
-    print("Error: Year = ", yearlabel[y + 1], "Sum of pop total = ", checktot1, ", Sum of national projections = ", checktot2)
+    print(paste("Error: Year = ", yearlabel[y + 1], "Sum of pop total = ", checktot1, ", Sum of national projections = ", checktot2))
     break}}
 
 # Create Dataframe for CheckMig, CheckDeaths, Log
