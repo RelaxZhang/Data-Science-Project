@@ -484,7 +484,7 @@ readDN <- function(final, lastage, numages, dataset){
 writeNoteCL <- function(lastage, pclabel, labels_other_key, final, Areaname, sexlabel){
   
   # Create empty array for creating framework of check sheets
-  wb_wt_Log = array(rep(NaN, final*final), dim = c(final, final))
+  wb_wt_Log = array(rep(NaN, final*3), dim = c(final, 3))
   wb_wt_CheckMig = array(rep(NaN, (final*(lastage + 1)*2) * (numareas * 2 + 3 + 1)),
                          dim = c(final*(lastage+1)*2, numareas * 2 + 3 + 1))
   wb_wt_CheckDeaths = array(rep(NaN, (final*(lastage + 1)*2) * (numareas + 3 + 1)),
