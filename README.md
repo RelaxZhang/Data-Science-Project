@@ -15,7 +15,7 @@
 ##### dataplot.ipynb -- Code for Drawing the Pyramid Charts of the Selected Area
 
 #### 3. Text File
-##### Documentation_LSTM.txt -- Text for Recording the Documentation of all Types of LSTM Model for the Project
+##### Documentation_LSTM.txt -- Text for Recording the Documentation of all Types of LSTM Models for this Project
 -----------------------------------------------------------------------------------------------------------------
 
 ### Data - Folder of Raw / Preprocessed Dataset of Age-Sex Cohort Population in Australia
