@@ -1,11 +1,5 @@
 # Data-Science-Project
 
-### 12_Semester_1 - Semester 1 Assignment A (Presentation Video) & B (Proposal Report)
------------------------------------------------------------------------------------------------------------------
-
-### 12_Semester_2 - Semester 2 Assignment A (Presentation Video) & B (Final Report)
------------------------------------------------------------------------------------------------------------------
-
 ### Code - Source Code of Machine Learning Model on Age-Sex Cohort Projection
 
 #### 1. Code Folder
@@ -43,7 +37,13 @@
 ##### head5_smallest_m85.csv -- Dataframe for Expressing Data Sparsity
 -----------------------------------------------------------------------------------------------------------------
 
-### Image - Related Visualisation of Age-Sex Cohort Projection in Semester 1
+### Image - Related Visualisation of Age-Sex Cohort Projection
+-----------------------------------------------------------------------------------------------------------------
+
+### Semester_1 - Semester 1 Assignment A (Presentation Video) & B (Proposal Report)
+-----------------------------------------------------------------------------------------------------------------
+
+### Semester_2 - Semester 2 Assignment A (Presentation Video) & B (Final Report)
 -----------------------------------------------------------------------------------------------------------------
 
 ### VBA_Benchmark - Source Code & Dataset of Synthetic Migration Model
