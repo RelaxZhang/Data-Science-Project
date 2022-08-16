@@ -1,0 +1,32 @@
+Documentation of LSTM Model
+
+1. LSTM_Iterative_Predict_Type1.ipynb
+
+(a) Basic
+(i) LSTM Defining
+Defines the architecture of the LSTM model, such as the type and number of layers. Do not modify unless changing the architecture.
+
+(ii) LSTM Tuning
+Here the possible values for the hyperparameters are defined, such as the range of continuous hyperparameters or enumerations of discrete ones. These can be modified as needed to change the search space for the tuner.
+
+The build_model function is used as input for keras tuners. Here, the hyperparameter instances are defined then used alongside the model defining function. This function should only be modified when the architecture of the model changes.
+
+(b) Logic
+Create 1-D input(population for age-group) for rolling-predicted LSTM models.
+Train two models for two gender (male and female) seperately, then predict year by year. 
+After refitting the latest prediction, updatte the input for next forecast.
+
+Comment for: Preprocessing by Splitting Population into Sex-Group
+Prepare the required input data for two models (male and female). 
+Store population (value) for each age-group (key) into dictionary for male and female.
+
+Comment for: Create Dataframe for Storing Prediction Result
+Prepare for the output csv file that contain both gender for each age-group prediction.
+Store the predicted result into the same format year-by-year.
+
+(c) Others
+(i) Data Scaling
+
+(ii) Input Data Merging
+
+2. LSTM_Iterative_Predict_Type2.ipynb
