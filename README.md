@@ -2,7 +2,7 @@
 
 ### Code - Source Code of Machine Learning Model on Age-Sex Cohort Projection
 
-### Data - Folder of Raw / Preprocessed Dataset of Age-Sex Cohort Population in Australia\
+### Data - Folder of Raw / Preprocessed Dataset of Age-Sex Cohort Population in Australia
 
 ####  1. Data Folder
 ##### True -- Folder of True Value Dataset of all Age-Sex Cohorts Data for Evaluation
@@ -19,6 +19,8 @@
 ##### Above1000.csv -- Dataframe for Pyramid Charts Visualisation
 ##### ts_1000.csv -- Dataframe for Trend Plot of all Areas
 ##### head5_smallest_m85.csv -- Dataframe for Expressing Data Sparsity
+
+-----------------------------------------------------------------------------------------------------------------
 
 ### Hurdle Task - Semester 1 Assignment A (Presentation Video) & B (Proposal Report)
 
