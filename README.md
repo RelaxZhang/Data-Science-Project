@@ -1,8 +1,8 @@
 # Data-Science-Project
 
 ### Code - Source Code of Machine Learning Model on Age-Sex Cohort Projection
-
 -----------------------------------------------------------------------------------------------------------------
+
 ### Data - Folder of Raw / Preprocessed Dataset of Age-Sex Cohort Population in Australia
 
 ####  1. Data Folder
@@ -20,13 +20,15 @@
 ##### Above1000.csv -- Dataframe for Pyramid Charts Visualisation
 ##### ts_1000.csv -- Dataframe for Trend Plot of all Areas
 ##### head5_smallest_m85.csv -- Dataframe for Expressing Data Sparsity
-
 -----------------------------------------------------------------------------------------------------------------
 
 ### Hurdle Task - Semester 1 Assignment A (Presentation Video) & B (Proposal Report)
+-----------------------------------------------------------------------------------------------------------------
 
 ### Image - Related Visualisation of Age-Sex Cohort Projection in Semester 1
+-----------------------------------------------------------------------------------------------------------------
 
 ### VBA_Benchmark - Source Code & Dataset of Synthetic Migration Model
+-----------------------------------------------------------------------------------------------------------------
 
 ### VBA_9616 - Source Code & Dataset of Synthetic Migration Model Based on 1991-2011
