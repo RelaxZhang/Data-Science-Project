@@ -51,7 +51,7 @@
 
 #### 2. Data File
 ##### original.xlsm -- Excel Workbook Containing all Required Data and Macro Code for the Synthetic Migration Model
-##### vba.xlsm -- Excel Workbook Containing all Required Data and Prediction Result from Synthetic Migration Model Written in R / Python
+##### vba.xlsm -- Excel Workbook Containing all Required Data and Prediction Result from Synthetic Migration Model Written in R
 
 #### 3. Code File
 ##### ExcelCSV.ipynb -- Code for Converting Excel Format Data to Input_CSV and Revert Output_CSV to Excel File
