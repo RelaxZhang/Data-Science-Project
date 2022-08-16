@@ -1,6 +1,13 @@
 # Data-Science-Project
 
 ### Code - Source Code of Machine Learning Model on Age-Sex Cohort Projection
+
+#### 1. Code Folder
+##### Potential Code -- Folder of Code(s) that is used in Visualisation if Required
+##### Deprecate Code -- Folder of Code(s) that is Discared (Some csv can be Generated with these Code(s) if Required)
+
+#### 2. Code File
+
 -----------------------------------------------------------------------------------------------------------------
 
 ### Data - Folder of Raw / Preprocessed Dataset of Age-Sex Cohort Population in Australia
