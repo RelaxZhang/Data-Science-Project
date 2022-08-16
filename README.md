@@ -3,11 +3,19 @@
 ### Code - Source Code of Machine Learning Model on Age-Sex Cohort Projection
 
 #### 1. Code Folder
-##### Potential Code -- Folder of Code(s) that is used in Visualisation if Required
-##### Deprecate Code -- Folder of Code(s) that is Discared (Some csv can be Generated with these Code(s) if Required)
+##### Potential Code -- Folder of Code that is used in Visualisation if Required
+##### Deprecate Code -- Folder of Code that is Discared (Some csv can be Generated with these Code if Required)
 
 #### 2. Code File
+##### LSTM_Iterative_Predict_Type1.ipynb -- LSTM Model Type 1 Code
+##### LSTM_Model_Type1.py -- Function Package for LSTM Model Type 1
+##### Evaluation.ipynb -- Code of Evaluation Matrix for all Area (325 + 1)
+##### Evaluation_1000.ipynb -- Code of Evaluation Matrix for all Area with Total Population > 1000 (325)
+##### trueValue.ipynb -- Code for Generating True Value Dataframe for Evaluation Usage
+##### dataplot.ipynb -- Code for Drawing the Pyramid Charts of the Selected Area
 
+#### 3. Text File
+##### LSTM_Documentation.txt -- Text for Recording the Documentation of all Types of LSTM Model for the Project
 -----------------------------------------------------------------------------------------------------------------
 
 ### Data - Folder of Raw / Preprocessed Dataset of Age-Sex Cohort Population in Australia
