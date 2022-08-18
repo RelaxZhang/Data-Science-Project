@@ -145,14 +145,18 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_bounds, val_bound
             
             # If the prediction result is negative, replace it with 0
             prediction[prediction < 0] = 0
-
+            unscaled_prediction = unscale_prediction(prediction, code, sex_label, minima_dict, maxima_dict)
+            print("Area code: ", code)
+            print("Year: ", 2002+iter)
+            print("Scaled prediction: ", prediction)
+            print("Unscaled prediction: ", unscaled_prediction)
+            
             # Store the prediction result just in case for further checking        
             prediction_list.append(prediction)
 
             # Reconstruct the new x_input for next round's prediction
             prediction = prediction.reshape(1,1,18)   
-            print (unscale_prediction(prediction, code, sex_label, minima_dict, maxima_dict))
-            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), pred_start + iter] = unscale_prediction(prediction, code, sex_label, minima_dict, maxima_dict)
+            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), pred_start + iter] = unscaled_prediction
             x_input = np.hstack((x_input,prediction)) # Add the latest prediction
             x_input = x_input[0][1:].reshape(1,n_steps,n_features)  # Delete the first value
 
