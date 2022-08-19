@@ -52,6 +52,7 @@ def split_position(n_steps, train_start, train_end, fixed_num_val):
     train_val_bounds = slice(None, window_num)
     test_bounds = window_num
     return train_val_bounds, test_bounds
+    
 def minima_df(df, sa3_codes):
     minima_dict = defaultdict(dict)
     for sa3_code in sa3_codes:
@@ -118,7 +119,7 @@ def unscale_prediction(arr, area, sex, minima_dict, maxima_dict):
 
 
 '''Function for fitting the LSTM Model with each Sex data for all age-cohort in each area and return the prediction result (dataframe) for evaluation'''
-def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, pred_start, tuner, output, minima_dict, maxima_dict):
+def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, pred_start, tuner, output):
 
     # Fit the Model with select sex's age-cohorts in the selected area
     for code in sa3_codes:
@@ -159,8 +160,7 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_
 
             # Reconstruct the new x_input for next round's prediction
             prediction = prediction.reshape(1,1,18)   
-            print (unscale_prediction(prediction, code, sex_label, minima_dict, maxima_dict))
-            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), pred_start + iter] = unscale_prediction(prediction, code, sex_label, minima_dict, maxima_dict)
+            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), pred_start + iter] = prediction
             x_input = np.hstack((x_input,prediction)) # Add the latest prediction
             x_input = x_input[0][1:].reshape(1,n_steps,n_features)  # Delete the first value
 
