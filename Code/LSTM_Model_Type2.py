@@ -45,16 +45,19 @@ def new_split_sequence(sequence, n_steps, shift):
     return np.array(X), np.array(y)
 
 '''Function to generate splitting position of the dataset with given n_step size of the sliding window and the fixed amount of validation set(s)'''
-def split_position(n_steps, train_start, train_end, fixed_num_val):
+def split_position(n_steps, train_start, train_end):
     len_full_train = train_end - train_start + 1
     window_num = len_full_train - n_steps
-    train_ends = window_num - fixed_num_val
     train_val_bounds = slice(None, window_num)
     test_bounds = window_num
     return train_val_bounds, test_bounds
 
+'''Function to scale back the prediction result'''
+def unscale_prediction(arr, minimum, maximum):
+    return (arr * (maximum-minimum) + minimum)
+
 '''Function for fitting the LSTM Model with each Sex data for all age-cohort in each area and return the prediction result (dataframe) for evaluation'''
-def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, pred_start, tuner, output):
+def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, pred_start, tuner, output, train_minimum, train_maximum):
 
     # Fit the Model with select sex's age-cohorts in the selected area
     for code in sa3_codes:
@@ -86,6 +89,10 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_
 
             # use the best LSTM Model to predict the next year's value with x_input
             prediction = best_model.predict(x_input, verbose=0)
+
+            # Generate the scaled back result of the predicted value
+            unscaled_prediction = unscale_prediction(prediction, train_minimum, train_maximum)
+
             
             # If the prediction result is negative, replace it with 0
             prediction[prediction < 0] = 0
@@ -95,7 +102,7 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_
 
             # Reconstruct the new x_input for next round's prediction
             prediction = prediction.reshape(1,1,18)   
-            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), pred_start + iter] = prediction
+            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), pred_start + iter] = unscaled_prediction
             x_input = np.hstack((x_input,prediction)) # Add the latest prediction
             x_input = x_input[0][1:].reshape(1,n_steps,n_features)  # Delete the first value
 
