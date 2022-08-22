@@ -2,6 +2,8 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import LSTM
 from keras.layers import Dense
+from tensorflow import Tensor
+import tensorflow as tf
 
 '''Function for Creating list for X (Time-Series) and y (Response / Predicted Value) to Match the LSTM Model Sliding Window'''
 def split_sequence(sequence, n_steps):
@@ -98,17 +100,25 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_bounds, val_bound
 
 def LSTM_FitPredict_Combined(sa3_codes, population_dict, n_steps, train_bounds, val_bounds, test_bounds, n_features, epochs_num, pred_start, tuner, output):
 
-    # Fit the Model with select sex's age-cohorts in the selected area
+    # Fit the Model with select age-cohorts in the selected area
     for code in sa3_codes:
         population_sample_data = list(population_dict[code].values())
         X, y = split_sequence(population_sample_data, n_steps)
+        
+        
+        X = tf.convert_to_tensor(X)
+        y = tf.convert_to_tensor(y)
+        
+        
         train_x = X[train_bounds]
         train_y = y[train_bounds]
         val_x = X[val_bounds]
         val_y = y[val_bounds]
         test_x = X[test_bounds]
-        test_y = y[test_bounds]
-        train_x = train_x.reshape((train_x.shape[0], train_x.shape[1], n_features))
+        test_y = y[test_bounds]       
+#         train_x = train_x.reshape((train_x.shape[0], train_x.shape[1], n_features))
+        
+        train_x = tf.reshape(train_x, [train_x.shape[0], train_x.shape[1], n_features])
 
         # Search for the best LSTM Model of this Area's data
         tuner.search(train_x, train_y, epochs = epochs_num, validation_data=(val_x, val_y), verbose = 0)
@@ -119,7 +129,9 @@ def LSTM_FitPredict_Combined(sa3_codes, population_dict, n_steps, train_bounds, 
 
         # Create the first x_input window with data from 2002 (start year of the test set) 
         x_input = test_x
-        x_input = x_input.reshape((1, n_steps, n_features))
+#         x_input = x_input.reshape((1, n_steps, n_features))
+        
+        x_input = tf.reshape(x_input, [1, n_steps, n_features])
         
         # Create the Prediction_list for recording each selected sex in the selected area to store each round's predicted result
         prediction_list = []
@@ -141,7 +153,10 @@ def LSTM_FitPredict_Combined(sa3_codes, population_dict, n_steps, train_bounds, 
             
             output.loc[(output['Code'] == code) , pred_start + iter] = prediction
             x_input = np.hstack((x_input,prediction)) # Add the latest prediction
-            x_input = x_input[0][1:].reshape(1,n_steps,n_features)  # Delete the first value
-
+#             x_input = x_input[0][1:].reshape(1,n_steps,n_features)  # Delete the first value
+            
+    
+            x_input = tf.reshape(x_input[0][1:], [1,n_steps,n_features])
     # Return the prediction result for the selected sex
     return output
+
