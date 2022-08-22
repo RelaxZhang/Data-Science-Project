@@ -76,13 +76,12 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_
 
             # use the best LSTM Model to predict the next year's value with x_input
             prediction = best_model.predict(x_input, verbose=0)
-
-            # Generate the scaled back result of the predicted value
-            unscaled_prediction = unscale_prediction(prediction, train_minimum, train_maximum)
-
             
             # If the prediction result is negative, replace it with 0
             prediction[prediction < 0] = 0
+
+            # Generate the scaled back result of the predicted value
+            unscaled_prediction = unscale_prediction(prediction, train_minimum, train_maximum)
 
             # Store the prediction result just in case for further checking        
             prediction_list.append(prediction)
