@@ -40,7 +40,7 @@ def split_position(n_steps, train_start, train_end):
     return train_val_bounds, test_bounds
 
 '''Function for fitting the LSTM Model with each Sex data for all age-cohort in each area and return the prediction result (dataframe) for evaluation'''
-def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, pred_start, tuner, output):
+def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, pred_start, tuner, output, search_callbacks, fit_callbacks):
 
     # Fit the Model with select sex's age-cohorts in the selected area
     for code in sa3_codes:
@@ -53,11 +53,13 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_
         train_x = train_x.reshape((train_x.shape[0], train_x.shape[1], n_features))
 
         # Search for the best LSTM Model of this Area's data
-        tuner.search(train_x, train_y, epochs = epochs_num, validation_data=(val_x, val_y), verbose = 0)
+        tuner.search(train_x, train_y, epochs = epochs_num, validation_data=(val_x, val_y), verbose = 0,
+                    callbacks = search_callbacks)
         best_model = tuner.get_best_models(num_models=2)[0]
         
         # Fit and Record the LSTM Model based on the selected sex in the selected area
-        history = best_model.fit(train_x, train_y, epochs = epochs_num, validation_data = (val_x, val_y), verbose = 0)
+        history = best_model.fit(train_x, train_y, epochs = epochs_num, validation_data = (val_x, val_y), verbose = 0,
+                                callbacks = fit_callbacks)
 
         # Create the first x_input window with data from 2002 (start year of the test set) 
         x_input = test_x
