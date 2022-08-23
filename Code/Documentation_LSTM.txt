@@ -1,5 +1,7 @@
 Documentation of LSTM Model
 
+================================================================================================================================================================================================================================
+================================================================================================================================================================================================================================
 1. LSTM_Iterative_Predict_Type1.ipynb
 
 (a) Basic
@@ -26,9 +28,38 @@ Comment for: Create Dataframe for Storing Prediction Result
 Prepare for the output csv file that contain both gender for each age-group prediction.
 Store the predicted result into the same format year-by-year.
 
-(c) Others
-(i) Data Scaling
-
-(ii) Input Data Merging
+================================================================================================================================================================================================================================
+================================================================================================================================================================================================================================
 
 2. LSTM_Iterative_Predict_Type2.ipynb
+
+(a) Potential Methods
+(i) Data Scaling
+(ii) Input Data Merging / .tf Type Data Input Converting
+(iii) Random Training & Validation Spliting (train_test_split from sklearn) of Full Training Set Starts from 1991 to 2001
+(iv) Non-negative Processing during Rolling Prediction
+
+(b) Applied Methods
+(i) Random Training & Validation Spliting -- Validation Set weights = 0.2
+Reason: Allows us to collect the more valuable information from 1999-2001 (closest to the target years) rather than having a fixed validation set from 1999-2001
+
+(ii) Non-negative Processing -- Replace negative result from each year's predicted result during rolling updating process by 0
+Reason: Population in all areas should not be negative
+
+(c) Discarded Methods
+(i) Min-Max Scaling -- With scaling & random spliting & non-negative process, the model does not provide a better result but introducing the risk of distorting the model (extremely large error rate in prediction year of 2011)
+Reason: Scaling will let the data lies in range between [0, 1], which might clash with the process of non-negative replacement by 0 since the data scale are largely changed but the replacement is still 0 (unscaled)
+
+(ii) Input Data Merging / .tf Type Data Input Converting
+This method is origianlly designed for saving computational time but both of them does not provides a good result (or a acceptable trade-off)
+Reason 1: Input Data Merging helps to cut half of the model fitting time (e.g. 3.5hrs of LSTM Model Type 1 with merged data but 7 hrs for the original one). However, the error rate has significantly increased.
+Reason 2: .tf Type Data Input Converting does not save any computational time but lead to redundant preprocessing of the Dataframe
+
+(d) Potential Improvement
+(i) Learning rate
+(ii) Early Stoping of the LSTM Model's Fitting
+
+================================================================================================================================================================================================================================
+================================================================================================================================================================================================================================
+
+3. LSTM_Iterative_Predict_Type3.ipynb
