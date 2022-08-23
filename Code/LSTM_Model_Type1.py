@@ -52,14 +52,22 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_bounds, val_bound
     for code in sa3_codes:
         male_sample_data = list(population_dict[code].values())
         X, y = split_sequence(male_sample_data, n_steps)
+        
+                
+        X = tf.convert_to_tensor(X)
+        y = tf.convert_to_tensor(y)
+        
         train_x = X[train_bounds]
         train_y = y[train_bounds]
         val_x = X[val_bounds]
         val_y = y[val_bounds]
         test_x = X[test_bounds]
         test_y = y[test_bounds]
-        train_x = train_x.reshape((train_x.shape[0], train_x.shape[1], n_features))
+#         train_x = train_x.reshape((train_x.shape[0], train_x.shape[1], n_features))
 
+        train_x = tf.reshape(train_x, [train_x.shape[0], train_x.shape[1], n_features])
+
+        
         # Search for the best LSTM Model of this Area's data
         tuner.search(train_x, train_y, epochs = epochs_num, validation_data=(val_x, val_y), verbose = 0)
         best_model = tuner.get_best_models(num_models=2)[0]
@@ -69,8 +77,10 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_bounds, val_bound
 
         # Create the first x_input window with data from 2002 (start year of the test set) 
         x_input = test_x
-        x_input = x_input.reshape((1, n_steps, n_features))
+#         x_input = x_input.reshape((1, n_steps, n_features))
         
+        x_input = tf.reshape(x_input, [1, n_steps, n_features])
+    
         # Create the Prediction_list for recording each selected sex in the selected area to store each round's predicted result
         prediction_list = []
 
@@ -90,8 +100,10 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_bounds, val_bound
             prediction = prediction.reshape(1,1,18)
             output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), pred_start + iter] = prediction
             x_input = np.hstack((x_input,prediction)) # Add the latest prediction
-            x_input = x_input[0][1:].reshape(1,n_steps,n_features)  # Delete the first value
-
+#             x_input = x_input[0][1:].reshape(1,n_steps,n_features)  # Delete the first value
+            
+            x_input = tf.reshape(x_input[0][1:], [1,n_steps,n_features])
+            
     # Return the prediction result for the selected sex
     return output
 
