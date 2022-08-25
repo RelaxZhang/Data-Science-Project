@@ -55,7 +55,7 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_
         # Search for the best LSTM Model of this Area's data
         tuner.search(train_x, train_y, epochs = epochs_num, validation_data=(val_x, val_y), verbose = 0,
                     callbacks = search_callbacks)
-        best_model = tuner.get_best_models(num_models=2)[0]
+        best_model = tuner.get_best_models(num_models = 1)[0]
         
         # Fit and Record the LSTM Model based on the selected sex in the selected area
         history = best_model.fit(train_x, train_y, epochs = epochs_num, validation_data = (val_x, val_y), verbose = 0,
