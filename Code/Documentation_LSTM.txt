@@ -56,8 +56,13 @@ Reason 1: Input Data Merging helps to cut half of the model fitting time (e.g. 3
 Reason 2: .tf Type Data Input Converting does not save any computational time but lead to redundant preprocessing of the Dataframe
 
 (d) Potential Improvement
-(i) Learning rate
-(ii) Early Stoping of the LSTM Model's Fitting
+(i) Early Stopping of the LSTM Model's Fitting
+When looking for the best hyperparameters, the search stops early if the validation metric stops decreasing for a certain number of epochs.
+Reason: Reduce computation time.
+(ii) Learning rate
+Once the best hyperparameter values are obtained, the learning rate can be reduced if the validation loss stops decreasing for a certain number of epochs.
+Reason: Potentially improve accuracy.
+
 
 ================================================================================================================================================================================================================================
 ================================================================================================================================================================================================================================
