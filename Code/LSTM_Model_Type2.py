@@ -50,7 +50,6 @@ def LSTM_FitPredict(sa3_codes, population_dict, n_steps, train_val_bounds, test_
         train_val_y = y[train_val_bounds]
         train_x, val_x, train_y, val_y = train_test_split(train_val_x, train_val_y, test_size=0.2, random_state=42)
         test_x = X[test_bounds]
-        test_y = y[test_bounds]
         train_x = train_x.reshape((train_x.shape[0], train_x.shape[1], n_features))
 
         # Search for the best LSTM Model of this Area's data
