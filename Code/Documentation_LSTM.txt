@@ -62,7 +62,8 @@ Reason: Reduce computation time.
 (ii) Learning rate
 Once the best hyperparameter values are obtained, the learning rate can be reduced if the validation loss stops decreasing for a certain number of epochs.
 Reason: Potentially improve accuracy.
-
+(iii) Different Loss Funciton
+Select mean-square-error as the optimal loss function in LSTM Model Fitting rather than the mean abosolute percentage error.
 
 ================================================================================================================================================================================================================================
 ================================================================================================================================================================================================================================
