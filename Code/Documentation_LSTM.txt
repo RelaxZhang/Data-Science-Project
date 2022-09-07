@@ -58,10 +58,10 @@ Reason 2: .tf Type Data Input Converting does not save any computational time bu
 (d) Potential Improvement -- All the methods below do not improve the accuracy / save the computational time
 (i) Early Stopping of the LSTM Model's Fitting
 When looking for the best hyperparameters, the search stops early if the validation metric stops decreasing for a certain number of epochs.
-Reason: Reduce computation time.
+Can potentially reduce computation time, although current implementations only apply this to hyperparameter tuning.
 (ii) Learning rate
 Once the best hyperparameter values are obtained, the learning rate can be reduced if the validation loss stops decreasing for a certain number of epochs.
-Reason: Potentially improve accuracy.
+Reducing the learning rate can help the model avoid overshooting the optimum weight values, but can slow down fitting.
 (iii) Different Loss Funciton
 Select mean-square-error as the optimal loss function in LSTM Model Fitting rather than the mean abosolute percentage error.
 
