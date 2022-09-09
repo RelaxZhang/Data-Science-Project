@@ -43,7 +43,7 @@
 ##### True_fulldata.csv -- Dataframe Contains all Areas (325 + 1)
 ##### True_1000_fulldata.csv -- Dataframe Contains all Areas with Total Population > 1000 in each Year (325)
 ##### Above1000.csv -- Dataframe for Pyramid Charts Visualisation
-##### External_Variable.csv -- Dataframe for Storing External Feature's Information (Birth Rate & Avg Total Population)
+##### External_Variable.csv -- Dataframe for Storing External Feature's Information (Birth Rate & Average Total Population)
 ##### ts_1000.csv -- Dataframe for Trend Plot of all Areas
 ##### head5_smallest_m85.csv -- Dataframe for Expressing Data Sparsity
 -----------------------------------------------------------------------------------------------------------------
