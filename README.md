@@ -8,12 +8,19 @@
 ##### Deprecate Code -- Folder of Code that is Discared (Some csv can be Generated with these Code if Required)
 
 #### 2. Code File
-##### LSTM_Iterative_Predict_Type1.ipynb -- LSTM Model Type 1 Code
-##### LSTM_Model_Type1.py -- Function Package for LSTM Model Type 1
 ##### Evaluation.ipynb -- Code of Evaluation Matrix for all Area (325 + 1)
 ##### Evaluation_1000.ipynb -- Code of Evaluation Matrix for all Area with Total Population > 1000 (325)
+##### External_Variable.ipynb -- Code of Generating External Variables' Data for Classification Preprocessing
+##### LSTM_Iterative_Predict_Type_Extra.ipynb -- LSTM Model Type Extra Code
+##### LSTM_Iterative_Predict_Type1.ipynb -- LSTM Model Type 1 Code
+##### LSTM_Iterative_Predict_Type2.ipynb -- LSTM Model Type 2 Code
+##### LSTM_Iterative_Predict_Type3.ipynb -- LSTM Model Type 3 Code
+##### LSTM_Model_Type_Extra.py -- Function Package for LSTM Model Type Extra
+##### LSTM_Model_Type1.py -- Function Package for LSTM Model Type 1
+##### LSTM_Model_Type2.py -- Function Package for LSTM Model Type 2
+##### LSTM_Model_Type3.py -- Function Package for LSTM Model Type 3
+##### pyramidPlot.ipynb -- Code for Drawing the Pyramid Charts of the Selected Area
 ##### trueValue.ipynb -- Code for Generating True Value Dataframe for Evaluation Usage
-##### dataplot.ipynb -- Code for Drawing the Pyramid Charts of the Selected Area
 
 #### 3. Text File
 ##### Documentation_LSTM.txt -- Text for Recording the Documentation of all Types of LSTM Models for this Project
@@ -36,6 +43,7 @@
 ##### True_fulldata.csv -- Dataframe Contains all Areas (325 + 1)
 ##### True_1000_fulldata.csv -- Dataframe Contains all Areas with Total Population > 1000 in each Year (325)
 ##### Above1000.csv -- Dataframe for Pyramid Charts Visualisation
+##### External_Variable.csv -- Dataframe for Storing External Feature's Information (Birth Rate & Avg Total Population)
 ##### ts_1000.csv -- Dataframe for Trend Plot of all Areas
 ##### head5_smallest_m85.csv -- Dataframe for Expressing Data Sparsity
 -----------------------------------------------------------------------------------------------------------------
