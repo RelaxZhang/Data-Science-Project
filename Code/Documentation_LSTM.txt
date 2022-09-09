@@ -89,3 +89,10 @@ Select mean-square-error as the optimal loss function in LSTM Model Fitting rath
 
 4. LSTM_Iterative_Predict_Type_Extra.ipynb
 
+(a) Implementation logic
+We only evaluate the model by 2006 and 2011's predictions, which has a five years gap.
+Create an extra model upon the previous version, with a new parameter "gap" and set it equal to 5.
+In this case, when we input the data for one year, the model will direcly output the prediction for 5 years later.
+So we only need two rounds to get the evaluation data. Input 2001, output 2006; input the predicted 2006, output 2011.
+
+(b) Implementation Reason
