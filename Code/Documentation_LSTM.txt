@@ -71,5 +71,21 @@ Select mean-square-error as the optimal loss function in LSTM Model Fitting rath
 3. LSTM_Iterative_Predict_Type3.ipynb
 
 (a) Extra Feature
-(i) Sex -- Seperate Model for LSTM Fitting and the sex should not be changed in any moment (pointless to be included)
-(ii) Age -- Potentially improve the model
+(i) Sex -- Different sex labels (male, female)
+(ii) Area -- Based on the area code of all 325 areas (for example 10101)
+(iii) Total population average -- The total population of one area for all time series divided by the time series length which is 21 in our data
+(iv) Birth rate -- The birth rate of one area
+
+(b) Implementation logic
+(i) For sex and area, different LSTM models are fitted on every sex label and area code by looping them.
+(ii) For total population average and birth rate, the data is seperated into equal length quantiles based on different levels of average population and birth rate, and fit the LSTM model seperately.
+
+(c) Result and findings
+(i) Based on the type 2 model implementation logic (looping through all areas and fit LSTM model for each one), the extra feature of total population average and birth rate is not meaningful (Every time the train, validation and test set are the same, so the projection result will be the same).
+(ii) The computation time is not increased and almost remain the same (for step 3 costs 3.5hrs), for everytime the model would be the same (known from (c) (i)), and every time the input data would be the same as well (each area time series population), so the running time would be almost the same.
+
+================================================================================================================================================================================================================================
+================================================================================================================================================================================================================================
+
+4. LSTM_Iterative_Predict_Type_Extra.ipynb
+
