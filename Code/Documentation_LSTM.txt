@@ -2,6 +2,7 @@ Documentation of LSTM Model
 
 ================================================================================================================================================================================================================================
 ================================================================================================================================================================================================================================
+
 1. LSTM_Iterative_Predict_Type1.ipynb
 
 (a) Basic
@@ -96,3 +97,6 @@ In this case, when we input the data for one year, the model will direcly output
 So we only need two rounds to get the evaluation data. Input 2001, output 2006; input the predicted 2006, output 2011.
 
 (b) Implementation Reason
+With only predicting age-sex cohorts' population in 2006, 2011, the rolling update iteration only requires two steps Processing
+Comparing the logic of the Standard type and the Extra type model, gap = 5 only requires 2 times error stacking while gap 1 requires 10 times
+In this case, it reduce the stacked error introduced in each round for predicting next step's result
