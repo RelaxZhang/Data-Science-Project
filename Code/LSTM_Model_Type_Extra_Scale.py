@@ -41,7 +41,11 @@ def split_position(n_steps, train_start, train_end):
     return train_val_bounds, test_bounds
 
 '''Function for fitting the LSTM Model with each Sex data for all age-cohort in each area and return the prediction result (dataframe) for evaluation'''
-def LSTM_FitPredict(sa3_codes, population_dict, gap, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, tuner, output):
+
+def unscale_prediction(arr, minimum, maximum):
+    return (arr * (maximum-minimum) + minimum)
+
+def LSTM_FitPredict(sa3_codes, population_dict, gap, train_val_bounds, test_bounds, n_features, epochs_num, sex_label, tuner, output, train_minimum, train_maximum):
 
     # Fit the Model with select sex's age-cohorts in the selected area
     for code in sa3_codes:
@@ -78,14 +82,20 @@ def LSTM_FitPredict(sa3_codes, population_dict, gap, train_val_bounds, test_boun
             prediction = best_model.predict(x_input, verbose=0)
             
             # If the prediction result is negative, replace it with 0
-            prediction[prediction < 0] = 0
+            zeros_prediction = np.copy(prediction)
+            zeros_prediction = unscale_prediction(zeros_prediction, train_minimum, train_maximum)
+            zeros_prediction[zeros_prediction < 0] = 0
+            
+            print(iter)
+            print(prediction)
+            print(zeros_prediction)
 
             # Store the prediction result just in case for further checking        
             prediction_list.append(prediction)
 
             # Reconstruct the new x_input for next round's prediction
             prediction = prediction.reshape(1,1,18)   
-            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), iter] = prediction
+            output.loc[(output['Code'] == code) & (output['Sex'] == sex_label), iter] = zeros_prediction
             x_input = np.hstack((x_input,prediction)) # Add the latest prediction
             x_input = x_input[0][1:].reshape(1,1,n_features)  # Delete the first value
 
